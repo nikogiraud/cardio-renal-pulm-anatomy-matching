@@ -482,6 +482,75 @@
       transition: width 180ms ease;
     }
 
+
+    .fact-card {
+      margin-top: 14px;
+      padding: 13px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-2);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .fact-card.is-muscle {
+      border-color: var(--correct);
+      background: light-dark(#f2fbf6, #142a22);
+    }
+
+    .fact-card.empty {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .fact-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .fact-title {
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .fact-badge {
+      flex: 0 0 auto;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .fact-card.is-muscle .fact-badge {
+      background: var(--correct-soft);
+      color: var(--correct);
+    }
+
+    .fact-grid {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 5px 10px;
+      margin: 0;
+    }
+
+    .fact-grid dt {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .fact-grid dd {
+      margin: 0;
+      color: var(--text);
+    }
+
     @media (max-width: 900px) {
       .game { grid-template-columns: 1fr; }
       .figure-panel { width: min(100%, 680px); margin: 0 auto; }
@@ -548,6 +617,7 @@
         <div id="labelBank" class="label-bank"></div>
 
         <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+        <div id="factCard" class="fact-card empty" aria-live="polite">Match a structure correctly to see its function, origin, insertion, and innervation here.</div>
       </aside>
     </section>
   </main>
@@ -5797,6 +5867,68 @@
       const retryReviewButton = document.getElementById("retryReviewButton");
       const resetButton = document.getElementById("resetButton");
 
+      const muscleFacts = [["posterior crico-arytenoid", {"type": "muscle", "fn": "ONLY muscle that ABducts the vocal folds (opens rima glottidis for breathing).", "origin": "Posterior surface of lamina of cricoid cartilage.", "insertion": "Muscular process of arytenoid cartilage.", "nerve": "Inferior laryngeal nerve (continuation of recurrent laryngeal nerve, CN X)."}], ["lateral crico-arytenoid", {"type": "muscle", "fn": "ADducts the vocal folds (closes intermembranous rima glottidis).", "origin": "Arch of cricoid cartilage.", "insertion": "Muscular process of arytenoid cartilage.", "nerve": "Recurrent laryngeal nerve (CN X)."}], ["transverse arytenoid", {"type": "muscle", "fn": "ADducts arytenoid cartilages (closes posterior/intercartilaginous rima glottidis).", "origin": "Posterior surface of one arytenoid cartilage.", "insertion": "Posterior surface of opposite arytenoid cartilage.", "nerve": "Recurrent laryngeal nerve (CN X)."}], ["ary-epiglottic muscle", {"type": "muscle", "fn": "Narrows laryngeal inlet during swallowing (acts as a sphincter with oblique arytenoid).", "origin": "Apex of arytenoid cartilage (continuation of oblique arytenoid).", "insertion": "Lateral margin of epiglottis.", "nerve": "Recurrent laryngeal nerve (CN X)."}], ["thyro-epiglottic", {"type": "muscle", "fn": "Widens the laryngeal inlet by pulling epiglottis slightly forward.", "origin": "Inner surface of thyroid cartilage.", "insertion": "Lateral margin of epiglottis and ary-epiglottic fold.", "nerve": "Recurrent laryngeal nerve (CN X)."}], ["vocalis", {"type": "muscle", "fn": "Fine-tunes tension/pitch of vocal folds (relaxes posterior vocal ligament while tensing anterior part); ADducts.", "origin": "Lateral surface of vocal process of arytenoid cartilage (part of thyroarytenoid).", "insertion": "Ipsilateral vocal ligament and inner thyroid angle.", "nerve": "Recurrent laryngeal nerve (CN X)."}], ["cricothyroid", {"type": "muscle", "fn": "Stretches and elongates vocal folds to raise pitch (rocks thyroid cartilage forward/down).", "origin": "Anterolateral part of cricoid cartilage.", "insertion": "Inferior margin and inferior horn of thyroid cartilage.", "nerve": "External branch of superior laryngeal nerve (CN X) \u2014 ONLY laryngeal muscle NOT innervated by RLN!"}], ["transverse muscle of trachea", {"type": "muscle", "fn": "Smooth muscle (trachealis) that narrows tracheal lumen during coughing to increase airflow velocity.", "origin": "Posterior ends of tracheal cartilage rings (one side).", "insertion": "Opposite posterior ends of tracheal cartilage rings.", "nerve": "Vagus nerve (CN X) & sympathetic fibers via pulmonary plexus."}], ["cricopharyngeal part", {"type": "muscle", "fn": "Forms the upper esophageal sphincter (prevents air entry/reflux); relaxes during swallowing.", "origin": "Lateral side of cricoid cartilage.", "insertion": "Encircles pharyngoesophageal junction continuously (no median raphe).", "nerve": "Pharyngeal plexus (CN X) & external/recurrent laryngeal branches."}], ["thyropharyngeal part", {"type": "muscle", "fn": "Constricts lower pharynx to propel food bolus into esophagus.", "origin": "Oblique line of thyroid cartilage.", "insertion": "Median pharyngeal raphe.", "nerve": "Pharyngeal plexus (CN X)."}], ["inferior constrictor", {"type": "muscle", "fn": "Constricts lower pharynx in swallowing; cricopharyngeus forms upper esophageal sphincter.", "origin": "Oblique line of thyroid cartilage & side of cricoid cartilage.", "insertion": "Median pharyngeal raphe.", "nerve": "Pharyngeal plexus (CN X)."}], ["middle constrictor", {"type": "muscle", "fn": "Constricts middle wall of pharynx during swallowing.", "origin": "Stylohyoid ligament and greater & lesser horns of hyoid bone.", "insertion": "Median pharyngeal raphe.", "nerve": "Pharyngeal plexus (CN X)."}], ["superior constrictor", {"type": "muscle", "fn": "Constricts upper pharynx during swallowing.", "origin": "Pterygoid hamulus, pterygomandibular raphe, posterior mylohyoid line of mandible.", "insertion": "Pharyngeal tubercle of occipital bone & median pharyngeal raphe.", "nerve": "Pharyngeal plexus (CN X)."}], ["stylopharyngeal", {"type": "muscle", "fn": "Elevates pharynx and larynx during swallowing and speaking.", "origin": "Styloid process of temporal bone.", "insertion": "Posterior & superior borders of thyroid cartilage and pharyngeal wall.", "nerve": "Glossopharyngeal nerve (CN IX) \u2014 ONLY pharyngeal muscle innervated by CN IX!"}], ["anterior scalene", {"type": "muscle", "fn": "Flexes neck laterally and elevates 1st rib (accessory muscle of inspiration). Landmark: phrenic nerve runs on its anterior surface.", "origin": "Anterior tubercles of transverse processes of C3\u2013C6.", "insertion": "Scalene tubercle on superior border of 1st rib.", "nerve": "Cervical spinal nerves (C4\u2013C6)."}], ["sternothyroid", {"type": "muscle", "fn": "Depresses hyoid and larynx after swallowing.", "origin": "Posterior surface of manubrium of sternum.", "insertion": "Oblique line of thyroid cartilage.", "nerve": "Ansa cervicalis (C1\u2013C3)."}], ["sternohyoid", {"type": "muscle", "fn": "Depresses hyoid bone after elevation during swallowing.", "origin": "Manubrium of sternum and medial end of clavicle.", "insertion": "Body of hyoid bone.", "nerve": "Ansa cervicalis (C1\u2013C3)."}], ["thyrohyoid", {"type": "muscle", "fn": "Depresses hyoid bone or elevates larynx when hyoid is fixed.", "origin": "Oblique line of thyroid cartilage.", "insertion": "Inferior border of body and greater horn of hyoid bone.", "nerve": "C1 fibers traveling via hypoglossal nerve (CN XII)."}], ["omohyoid", {"type": "muscle", "fn": "Depresses, retracts, and steadies hyoid bone.", "origin": "Superior border of scapula near suprascapular notch.", "insertion": "Inferior border of body of hyoid bone.", "nerve": "Ansa cervicalis (C1\u2013C3)."}], ["anterior belly of digastric", {"type": "muscle", "fn": "Depresses mandible (opens mouth) and elevates/steadies hyoid during swallowing.", "origin": "Digastric fossa of mandible.", "insertion": "Intermediate tendon attached to body and greater horn of hyoid bone.", "nerve": "Mylohyoid nerve (branch of inferior alveolar nerve, CN V3)."}], ["posterior belly of digastric", {"type": "muscle", "fn": "Elevates and steadies hyoid bone during swallowing and speaking.", "origin": "Mastoid notch of temporal bone.", "insertion": "Intermediate tendon attached to body and greater horn of hyoid bone.", "nerve": "Digastric branch of facial nerve (CN VII)."}], ["mylohyoid", {"type": "muscle", "fn": "Forms muscular floor of oral cavity; elevates hyoid, floor of mouth, and tongue during swallowing.", "origin": "Mylohyoid line of mandible.", "insertion": "Mylohyoid raphe and body of hyoid bone.", "nerve": "Mylohyoid nerve (branch of CN V3)."}], ["stylohyoid", {"type": "muscle", "fn": "Elevates and retracts hyoid bone, elongating floor of mouth.", "origin": "Styloid process of temporal bone.", "insertion": "Body of hyoid bone (splits around digastric tendon).", "nerve": "Cervical/stylohyoid branch of facial nerve (CN VII)."}], ["hyoglossus", {"type": "muscle", "fn": "Depresses and retracts the tongue.", "origin": "Body and greater horn of hyoid bone.", "insertion": "Inferior lateral aspect of tongue.", "nerve": "Hypoglossal nerve (CN XII)."}], ["styloglossus", {"type": "muscle", "fn": "Retracts tongue and draws it up to create a trough for swallowing.", "origin": "Anterior border of distal styloid process & stylohyoid ligament.", "insertion": "Lateral and inferior sides of tongue.", "nerve": "Hypoglossal nerve (CN XII)."}], ["genioglossus", {"type": "muscle", "fn": "Genioglossus protrudes & depresses tongue; geniohyoid pulls hyoid anterosuperiorly and widens pharynx.", "origin": "Mental spines (genial tubercles) on inner anterior mandible.", "insertion": "Dorsum of tongue (genioglossus) & body of hyoid bone (geniohyoid).", "nerve": "Genioglossus: CN XII; Geniohyoid: C1 via CN XII."}], ["buccinator", {"type": "muscle", "fn": "Presses cheek against molar teeth during chewing (keeps food out of vestibule); pierced by parotid duct.", "origin": "Alveolar processes of maxilla & mandible and pterygomandibular raphe.", "insertion": "Angle of mouth (modiolus) and orbicularis oris.", "nerve": "Buccal branches of facial nerve (CN VII)."}], ["medial pterygoid", {"type": "muscle", "fn": "Elevates mandible (closes jaw) and assists in protrusion & side-to-side grinding.", "origin": "Medial surface of lateral pterygoid plate, palatine bone, & maxillary tuberosity.", "insertion": "Medial surface of ramus and angle of mandible.", "nerve": "Mandibular nerve (CN V3)."}], ["depressor anguli oris", {"type": "muscle", "fn": "Depresses labial commissure bilaterally (frowning).", "origin": "Anterolateral base of mandible.", "insertion": "Angle of mouth (modiolus).", "nerve": "Marginal mandibular & buccal branches of facial nerve (CN VII)."}], ["pectoralis major", {"type": "muscle", "fn": "Flexes, adducts, and medially rotates arm at shoulder; accessory muscle of inspiration.", "origin": "Medial half of clavicle, sternum, superior 6 costal cartilages, external oblique aponeurosis.", "insertion": "Lateral lip of intertubercular sulcus of humerus.", "nerve": "Lateral (C5\u2013C7) and medial (C8\u2013T1) pectoral nerves."}], ["pectoralis minor", {"type": "muscle", "fn": "Depresses and protracts scapula; elevates ribs as accessory muscle of inspiration.", "origin": "3rd\u20135th ribs near costal cartilages.", "insertion": "Medial border and superior surface of coracoid process of scapula.", "nerve": "Medial pectoral nerve (C8\u2013T1)."}], ["serratus anterior", {"type": "muscle", "fn": "Protracts and upwardly rotates scapula; holds scapula against thoracic wall (injury \u2192 winged scapula).", "origin": "External surfaces of lateral parts of 1st\u20138th ribs.", "insertion": "Anterior surface of medial border of scapula.", "nerve": "Long thoracic nerve (C5\u2013C7)."}], ["rectus abdominis", {"type": "muscle", "fn": "Flexes trunk, compresses abdominal viscera, and aids forced expiration.", "origin": "Pubic symphysis and pubic crest.", "insertion": "Xiphoid process and 5th\u20137th costal cartilages.", "nerve": "Thoracoabdominal nerves (T7\u2013T11) and subcostal nerve (T12)."}], ["external abdominal oblique", {"type": "muscle", "fn": "Compresses/supports abdominal viscera, flexes & rotates trunk, aids forced expiration.", "origin": "External surfaces of 5th\u201312th ribs.", "insertion": "Linea alba, pubic tubercle, and anterior half of iliac crest.", "nerve": "Thoracoabdominal nerves (T7\u2013T11) and subcostal nerve (T12)."}], ["psoas major", {"type": "muscle", "fn": "Flexes thigh at hip (with iliacus), laterally flexes vertebral column, balances trunk; kidney & ureter lie directly anterior to it.", "origin": "Transverse processes & sides of bodies of T12\u2013L5 vertebrae and intervening discs.", "insertion": "Lesser trochanter of femur.", "nerve": "Anterior rami of lumbar nerves (L1\u2013L3)."}], ["quadratus lumborum", {"type": "muscle", "fn": "Extends & laterally flexes vertebral column; fixes 12th rib during inspiration. Lies posterior to the kidneys.", "origin": "Medial half of inferior border of 12th rib and tips of lumbar transverse processes.", "insertion": "Iliolumbar ligament and internal lip of iliac crest.", "nerve": "Anterior rami of T12 and L1\u2013L4 nerves."}], ["diaphragm", {"type": "muscle", "fn": "Primary muscle of inspiration \u2014 draws central tendon downward & forward to expand thoracic cavity. Hiatuses: IVC (T8), Esophagus (T10), Aorta (T12).", "origin": "Xiphoid process, lower 6 costal cartilages, and L1\u2013L3 vertebrae (crura).", "insertion": "Converges into the central tendon of the diaphragm.", "nerve": "Phrenic nerve (C3\u2013C5) \u2014 motor & central tendon sensory."}], ["papillary muscle", {"type": "muscle", "fn": "Conical ventricular muscles that tense chordae tendineae during systole to prevent AV valve prolapse (rupture post-MI \u2192 acute regurgitation).", "origin": "Internal ventricular wall (3 in RV: anterior, posterior, septal; 2 in LV: anterior, posterior).", "insertion": "Cusps of tricuspid (RV) or mitral (LV) valve via chordae tendineae.", "nerve": "Cardiac conducting system (Purkinje fibers / moderator band carries RBB to RV anterior papillary m.)."}]];
+      const generalFacts = [["recurrent laryngeal nerve", "Branch of CN X (loops under right subclavian a. / left aortic arch). Innervates ALL intrinsic laryngeal muscles EXCEPT cricothyroid, plus sensation below vocal folds. Unilateral injury \u2192 hoarseness; bilateral \u2192 stridor/glottic closure."], ["superior laryngeal nerve", "Branch of CN X: internal branch = sensory ABOVE vocal folds (cough reflex); external branch = motor to cricothyroid muscle."], ["phrenic nerve", "C3\u2013C5 ('keeps the diaphragm alive'). Runs on anterior scalene m. and ANTERIOR to lung root. Motor to diaphragm + sensory to central diaphragm, mediastinal pleura, & pericardium (referred pain to C3\u2013C5 supraclavicular skin)."], ["vagus nerve", "CN X. Runs POSTERIOR to the root of the lung, forms esophageal plexus, gives off recurrent laryngeal nerves, and provides parasympathetic fibers to heart (\u2193 HR) & lungs (bronchoconstriction)."], ["glossopharyngeal nerve", "CN IX. Motor to stylopharyngeus muscle; sensory (afferent limb of gag reflex) to oropharynx and posterior 1/3 of tongue."], ["hypoglossal nerve", "CN XII. Motor to all intrinsic and extrinsic tongue muscles EXCEPT palatoglossus."], ["lingual nerve", "Branch of CN V3. General sensation (pain/temp/touch) to anterior 2/3 of tongue (carries chorda tympani taste/parasympathetic fibers)."], ["thoracic duct", "Drains lower body, abdomen, and left upper body from cisterna chyli \u2192 aortic hiatus (T12) \u2192 posterior mediastinum \u2192 left venous angle (left IJV + subclavian v.). Injury causes chylothorax (milky pleural fluid)."], ["transverse pericardial sinus", "Recess posterior to ascending aorta & pulmonary trunk (admits 2 fingers); surgeons pass clamps/ligatures here during open-heart surgery."], ["oblique sinus of pericardium", "Cul-de-sac posterior to left atrium between pulmonary veins; surgical landmark for pericardiectomy & CABG."], ["azygos", "Drains right posterior thoracic wall (and receives hemiazygos/accessory hemiazygos from the left) and arches over the right lung root to enter the SVC."], ["internal thoracic", "Branch of 1st part of subclavian artery; gives anterior intercostal & pericardiophrenic arteries, ends as musculophrenic + superior epigastric. Frequently used as a CABG conduit."], ["left renal vein", "Longer than right; receives left gonadal, left suprarenal, and left inferior phrenic veins. Passes between SMA and aorta (compression = Nutcracker syndrome)."], ["ureter", "Retroperitoneal muscular tube (25 cm). 3 stone-impaction narrowings: UPJ, pelvic brim, bladder entry. Passes deep ('water under the bridge') to the uterine artery."], ["killian", "Killian's triangle: weak muscle-free zone between thyropharyngeus and cricopharyngeus where Zenker's diverticulum herniates."], ["lingula", "Tongue-shaped projection of the left upper lobe that is the embryologic/anatomic homolog of the right middle lobe."], ["horizontal fissure", "Only in the RIGHT lung; separates right upper lobe from right middle lobe along the 4th rib/costal cartilage."], ["oblique fissure", "Present in both lungs (T3 spinous process posteriorly \u2192 6th costal cartilage anteriorly); separates lower lobe from upper/middle lobes."], ["costodiaphragmatic recess", "Lowest pleural reflection between costal and diaphragmatic pleurae; site where pleural effusion layers first when upright."], ["coronary artery", "First branches of ascending aorta (from aortic sinuses). Occlusion frequency: LAD > RCA > LCx."], ["left atrium", "Most posterior chamber of the heart (receives 4 pulmonary veins); dilation can compress the esophagus \u2192 dysphagia."], ["right ventricle", "Most anterior chamber of the heart; pumps deoxygenated blood through pulmonary valve into pulmonary trunk."], ["tricuspid", "Right AV valve (3 cusps: anterior, posterior, septal); auscultated at right inferior sternum / left 4th\u20135th ICS."], ["pulmonic valve", "Semilunar valve between RV and pulmonary trunk; auscultated at 2nd left ICS near sternum."], ["aortic arch", "Superior mediastinum; gives off brachiocephalic trunk, left common carotid, & left subclavian. Aneurysm can compress left RLN \u2192 hoarseness."]];
+      const factCard = document.getElementById("factCard");
+
+      function lookupFact(name) {
+        const lower = String(name || "").toLowerCase();
+        for (const [key, info] of muscleFacts) {
+          if (lower.includes(key)) return info;
+        }
+        for (const [key, note] of generalFacts) {
+          if (lower.includes(key)) return { type: "structure", note };
+        }
+        return null;
+      }
+
+      function clearFactCard() {
+        factCard.className = "fact-card empty";
+        factCard.textContent = "Match a structure correctly to see its function, origin, insertion, and innervation here.";
+      }
+
+      function showFactCard(name) {
+        const info = lookupFact(name);
+        if (!info) {
+          factCard.className = "fact-card";
+          factCard.innerHTML = `<div class="fact-head"><span class="fact-title"></span><span class="fact-badge">Matched</span></div>`;
+          factCard.querySelector(".fact-title").textContent = name;
+          return;
+        }
+        if (info.type === "muscle") {
+          factCard.className = "fact-card is-muscle";
+          factCard.innerHTML = `
+            <div class="fact-head">
+              <span class="fact-title"></span>
+              <span class="fact-badge">Muscle</span>
+            </div>
+            <dl class="fact-grid">
+              <dt>Function</dt><dd class="f-fn"></dd>
+              <dt>Origin</dt><dd class="f-orig"></dd>
+              <dt>Insertion</dt><dd class="f-ins"></dd>
+              <dt>Innervation</dt><dd class="f-nerve"></dd>
+            </dl>
+          `;
+          factCard.querySelector(".fact-title").textContent = name;
+          factCard.querySelector(".f-fn").textContent = info.fn;
+          factCard.querySelector(".f-orig").textContent = info.origin;
+          factCard.querySelector(".f-ins").textContent = info.insertion;
+          factCard.querySelector(".f-nerve").textContent = info.nerve;
+        } else {
+          factCard.className = "fact-card";
+          factCard.innerHTML = `
+            <div class="fact-head">
+              <span class="fact-title"></span>
+              <span class="fact-badge">Quick Note</span>
+            </div>
+            <div class="f-note"></div>
+          `;
+          factCard.querySelector(".fact-title").textContent = name;
+          factCard.querySelector(".f-note").textContent = info.note;
+        }
+      }
+
+
       let activeSystem = "all";
       let activeFigure = figures[0];
       let roundAnswers = activeFigure.answers;
@@ -5979,6 +6111,7 @@
         updateRetryButton();
 
         const name = answers.get(labelNumber);
+        showFactCard(name);
         hotspotsForAnswer(labelNumber).forEach(h => {
           h.classList.add("solved");
           h.setAttribute("aria-disabled", "true");
@@ -6026,7 +6159,10 @@
         labelText.textContent = name;
         chip.append(dragHandle, labelText);
 
-        chip.addEventListener("click", () => selectChip(String(number)));
+        chip.addEventListener("click", () => {
+          if (solved.has(String(number))) { showFactCard(name); return; }
+          selectChip(String(number));
+        });
         chip.addEventListener("keydown", e => {
           if (!["Enter", " "].includes(e.key) || solved.has(String(number))) return;
           e.preventDefault();
@@ -6104,7 +6240,9 @@
         target.addEventListener("click", () => {
           const s = String(number);
           if (solved.has(s)) {
-            setStatus(`${s}: ${answerMap().get(s)}`, "correct");
+            const solvedName = answerMap().get(s);
+            setStatus(`${s}: ${solvedName}`, "correct");
+            showFactCard(solvedName);
             return;
           }
           if (!selectedNumber) {
@@ -6155,6 +6293,7 @@
         updateRetryButton();
         updateScore();
         setStatus(statusMessage);
+        clearFactCard();
       }
 
       function visibleFigures() {

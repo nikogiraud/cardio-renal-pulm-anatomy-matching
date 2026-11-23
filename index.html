@@ -6104,7 +6104,7 @@
         if (String(labelNumber) !== String(targetNumber)) {
           markWrong(targetElement);
           addToRetryPool(labelNumber, targetNumber);
-          setStatus(`Not quite: ${answers.get(labelNumber)} is not ${targetNumber}.`, "wrong");
+          setStatus(`Not quite: ${answers.get(labelNumber)} is not #${targetNumber} — both added to Retry missed (${retryPool.size}).`, "wrong");
           return;
         }
         solved.add(labelNumber);

@@ -5941,6 +5941,52 @@
       let retryingMissed = false;
       let hintTimer = null;
       let pointerDrag = null;
+      const STORAGE_KEY = "crp-anatomy-matching-progress-v1";
+      let figureProgress = {};
+
+      function loadState() {
+        try {
+          const raw = window.localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const data = JSON.parse(raw);
+          if (data && typeof data === "object") {
+            if (typeof data.activeSystem === "string" && ["all", "cardio", "renal", "pulm"].includes(data.activeSystem)) {
+              activeSystem = data.activeSystem;
+            }
+            if (Array.isArray(data.perfectFigures)) {
+              perfectFigures = new Set(data.perfectFigures.map(String));
+            }
+            if (data.figureProgress && typeof data.figureProgress === "object") {
+              figureProgress = data.figureProgress;
+            }
+            if (typeof data.activeFigureId === "string") {
+              const found = figures.find(f => f.id === data.activeFigureId);
+              if (found) activeFigure = found;
+            }
+          }
+        } catch (err) {
+          // Ignore storage errors (e.g. private browsing)
+        }
+      }
+
+      function saveState() {
+        try {
+          figureProgress[activeFigure.id] = {
+            solved: [...solved],
+            retryPool: [...retryPool],
+            retryingMissed: Boolean(retryingMissed),
+            retryTargets: retryingMissed ? roundAnswers.map(([n]) => String(n)) : null
+          };
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            activeSystem,
+            activeFigureId: activeFigure.id,
+            perfectFigures: [...perfectFigures],
+            figureProgress
+          }));
+        } catch (err) {
+          // Ignore storage quota/access errors
+        }
+      }
       const quizDragType = "application/x-anatomy-structure-number";
 
       const systemDefs = [
@@ -5993,6 +6039,7 @@
           if (valid.has(s)) retryPool.add(s);
         });
         updateRetryButton();
+        saveState();
       }
 
       function clearSelection() {
@@ -6127,6 +6174,7 @@
         }
         clearSelection();
         updateScore();
+        saveState();
         if (solved.size === roundAnswers.length) {
           if (retryPool.size) {
             setStatus(`Round complete — retry the ${retryPool.size} ${retryPool.size === 1 ? "structure" : "structures"} missed or revealed with Find.`, "wrong");
@@ -6269,14 +6317,26 @@
       }
 
       function renderRound({
-        answers = activeFigure.answers,
+        answers = null,
         retryMode = false,
-        statusMessage = "Choose a structure to begin."
+        statusMessage = "Choose a structure to begin.",
+        restore = false
       } = {}) {
         clearHint();
-        roundAnswers = answers;
-        retryingMissed = retryMode;
-        retryPool = new Set();
+        const saved = restore ? figureProgress[activeFigure.id] : null;
+        const validMap = answerMap();
+        if (saved && saved.retryingMissed && Array.isArray(saved.retryTargets) && saved.retryTargets.length) {
+          const targetSet = new Set(saved.retryTargets.map(String));
+          roundAnswers = activeFigure.answers.filter(([n]) => targetSet.has(String(n)));
+          retryingMissed = true;
+        } else {
+          roundAnswers = answers || activeFigure.answers;
+          retryingMissed = retryMode;
+        }
+        const roundSet = new Set(roundAnswers.map(([n]) => String(n)));
+        solved = new Set(saved && Array.isArray(saved.solved) ? saved.solved.map(String).filter(n => roundSet.has(n)) : []);
+        retryPool = new Set(saved && Array.isArray(saved.retryPool) ? saved.retryPool.map(String).filter(n => validMap.has(n)) : []);
+
         image.src = activeFigure.image;
         image.width = activeFigure.width;
         image.height = activeFigure.height;
@@ -6286,16 +6346,36 @@
           ? `${roundAnswers.length} review ${roundAnswers.length === 1 ? "target" : "targets"}`
           : `${activeFigure.answers.length} targets`;
         figureNote.textContent = activeFigure.note;
-        bank.replaceChildren(...shuffled(roundAnswers).map(makeChip));
+
+        const unsolvedRound = roundAnswers.filter(([n]) => !solved.has(String(n)));
+        const solvedRound = roundAnswers.filter(([n]) => solved.has(String(n)));
+        bank.replaceChildren(...[...solvedRound, ...shuffled(unsolvedRound)].map(makeChip));
         hotspotLayer.replaceChildren(...(targetPoints[activeFigure.id] || []).flatMap(makeHotspotElements));
+
+        solved.forEach(num => {
+          hotspotsForAnswer(num).forEach(h => {
+            h.classList.add("solved");
+            h.setAttribute("aria-disabled", "true");
+          });
+          const chip = bank.querySelector(`.label-chip[data-number="${CSS.escape(num)}"]`);
+          if (chip) {
+            chip.classList.add("solved");
+            chip.setAttribute("aria-disabled", "true");
+          }
+        });
+
         window.requestAnimationFrame(layoutHotspots);
-        solved = new Set();
         selectedNumber = null;
         updateFindButton();
         updateRetryButton();
         updateScore();
-        setStatus(statusMessage);
+        if (restore && solved.size > 0) {
+          setStatus(`Restored progress: ${solved.size} / ${roundAnswers.length} matched.`, "correct");
+        } else {
+          setStatus(statusMessage);
+        }
         clearFactCard();
+        saveState();
       }
 
       function visibleFigures() {
@@ -6322,7 +6402,9 @@
             const filtered = visibleFigures();
             if (!filtered.some(f => f.id === activeFigure.id) && filtered.length) {
               activeFigure = filtered[0];
-              renderRound();
+              renderRound({ restore: true });
+            } else {
+              saveState();
             }
             renderSystemFilters();
             renderTabs();
@@ -6344,7 +6426,7 @@
           tab.addEventListener("click", () => {
             activeFigure = figure;
             renderTabs();
-            renderRound();
+            renderRound({ restore: true });
           });
           return tab;
         }));
@@ -6370,9 +6452,10 @@
       });
       resetButton.addEventListener("click", () => {
         perfectFigures.delete(activeFigure.id);
+        delete figureProgress[activeFigure.id];
         renderTabs();
         renderSystemFilters();
-        renderRound();
+        renderRound({ restore: false, statusMessage: "Round reset. Choose a structure to begin." });
       });
 
       document.addEventListener("pointermove", movePointerDrag, { passive: false });
@@ -6392,9 +6475,10 @@
       image.addEventListener("load", layoutHotspots);
       new ResizeObserver(layoutHotspots).observe(hotspotLayer);
 
+      loadState();
       renderSystemFilters();
       renderTabs();
-      renderRound();
+      renderRound({ restore: true });
     })();
   </script>
 </body>

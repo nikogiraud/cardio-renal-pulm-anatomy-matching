@@ -1,0 +1,6260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cardio, Renal &amp; Pulm Anatomy Figure Matching</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: light-dark(#eef3f8, #0d1219);
+      --surface: light-dark(#ffffff, #161d27);
+      --surface-2: light-dark(#f6f8fb, #202936);
+      --text: light-dark(#17202c, #eef4fb);
+      --muted: light-dark(#5d6a79, #aab7c7);
+      --border: light-dark(#d4dce6, #354253);
+      --primary: light-dark(#235fb5, #78adf6);
+      --primary-soft: light-dark(#e7f0ff, #18365d);
+      --correct: light-dark(#167447, #65d39c);
+      --correct-soft: light-dark(#e3f5eb, #173f31);
+      --wrong: light-dark(#b52f3a, #ff8992);
+      --wrong-soft: light-dark(#fdebed, #4c2229);
+      --hint: #6d28d9;
+      --hint-fill: #f9df63;
+      --hint-text: #2e1065;
+      --cardio: light-dark(#be123c, #fb7185);
+      --renal: light-dark(#0f766e, #2dd4bf);
+      --pulm: light-dark(#1d4ed8, #60a5fa);
+      --shadow: 0 18px 50px light-dark(rgba(31, 47, 68, 0.12), rgba(0, 0, 0, 0.28));
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--page);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button { font: inherit; }
+
+    .app {
+      width: min(1280px, calc(100% - 30px));
+      margin: 0 auto;
+      padding: 24px 0 48px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.45rem, 2.4vw, 2.05rem);
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 7px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .score {
+      flex: 0 0 auto;
+      min-width: 132px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .score strong {
+      display: block;
+      font-size: 1.35rem;
+      line-height: 1.1;
+    }
+
+    .score span {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .system-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .system-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      padding: 6px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .system-pill:hover { border-color: var(--primary); }
+
+    .system-pill.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .system-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .system-pill.active .system-dot { background: #ffffff !important; }
+    .dot-cardio { background: var(--cardio); }
+    .dot-renal { background: var(--renal); }
+    .dot-pulm { background: var(--pulm); }
+
+    .figure-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .figure-tab,
+    .control {
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.88rem;
+    }
+
+    .figure-tab:hover,
+    .control:hover { border-color: var(--primary); }
+
+    .control:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .control:disabled:hover { border-color: var(--border); }
+
+    .figure-tab.active {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .figure-tab.perfect {
+      border-color: var(--correct);
+      background: var(--correct-soft);
+      color: var(--correct);
+      font-weight: 700;
+    }
+
+    .figure-tab.perfect::before { content: "✓ "; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 48px;
+      margin-bottom: 18px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .status {
+      min-width: 0;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    .status strong { color: var(--text); }
+    .status.correct { color: var(--correct); }
+    .status.wrong { color: var(--wrong); }
+
+    .toolbar-actions {
+      display: flex;
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .find-control {
+      width: 100%;
+      margin: 0 0 14px;
+      font-weight: 700;
+    }
+
+    .find-control:not(:disabled) {
+      border-color: var(--hint);
+      background: light-dark(#f3edff, #2b2142);
+    }
+
+    .find-control u {
+      text-decoration-thickness: 2px;
+      text-underline-offset: 3px;
+    }
+
+    .game {
+      display: grid;
+      grid-template-columns: minmax(370px, 620px) minmax(330px, 1fr);
+      align-items: start;
+      gap: 22px;
+    }
+
+    .figure-panel,
+    .practice-panel {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .figure-panel { padding: 14px; }
+
+    .figure-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 2px 12px;
+    }
+
+    .figure-heading h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .figure-heading span {
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .image-wrap {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      background: #ffffff;
+    }
+
+    .source-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .hotspot-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .source-number-mask {
+      position: absolute;
+      z-index: 1;
+      width: 34px;
+      height: 20px;
+      border-radius: 6px;
+      background: #ffffff;
+      pointer-events: none;
+    }
+
+    .source-number-mask.left { transform: translate(-65%, -50%); }
+    .source-number-mask.right { transform: translate(-35%, -50%); }
+
+    .hotspot {
+      position: absolute;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      width: clamp(24px, 4.4%, 32px);
+      aspect-ratio: 1;
+      padding: 0;
+      transform: translate(-50%, -50%);
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      background: #ffffff;
+      color: var(--primary);
+      font-size: clamp(0.62rem, 1.1vw, 0.76rem);
+      line-height: 1;
+      text-align: center;
+      font-weight: 700;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+    }
+
+    .hotspot:hover,
+    .hotspot.drag-over {
+      transform: translate(-50%, -50%) scale(1.16);
+      background: var(--primary-soft);
+      z-index: 10;
+    }
+
+    .hotspot.solved {
+      border-color: var(--correct);
+      background: var(--correct-soft);
+      color: var(--correct);
+      cursor: default;
+    }
+
+    .hotspot.wrong {
+      border-color: var(--wrong);
+      background: var(--wrong-soft);
+      color: var(--wrong);
+      animation: shake 240ms linear;
+    }
+
+    .hotspot.hint {
+      z-index: 12;
+      border-color: var(--hint);
+      background: var(--hint-fill);
+      color: var(--hint-text);
+      outline: 4px solid rgba(109, 40, 217, 0.28);
+      animation: hint-pulse 480ms ease-in-out 3;
+    }
+
+    .figure-note {
+      margin: 11px 2px 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.4;
+    }
+
+    .practice-panel {
+      position: sticky;
+      top: 14px;
+      padding: 18px;
+    }
+
+    .practice-panel h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .section-note {
+      margin: 5px 0 12px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.35;
+    }
+
+    .label-bank {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+      max-height: 68vh;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .label-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      min-height: 46px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-align: left;
+      font-size: 0.88rem;
+      line-height: 1.25;
+      cursor: pointer;
+      transition: border-color 120ms ease, background 120ms ease, transform 120ms ease;
+    }
+
+    .drag-handle {
+      display: inline-grid;
+      flex: 0 0 6px;
+      align-self: stretch;
+      place-items: center;
+      min-height: 26px;
+      border-radius: 7px;
+      cursor: grab;
+      touch-action: none;
+      opacity: 0;
+    }
+
+    .label-chip:hover { border-color: var(--primary); }
+
+    .label-chip:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.3);
+      outline-offset: 2px;
+    }
+
+    .label-chip.selected,
+    .label-chip.dragging {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      transform: translateY(-1px);
+    }
+
+    .label-chip.solved {
+      border-color: var(--correct);
+      background: var(--correct-soft);
+      color: var(--correct);
+      cursor: default;
+      opacity: 0.72;
+    }
+
+    .label-chip.solved::before { content: "✓ "; }
+
+    .drag-ghost {
+      position: fixed;
+      z-index: 1000;
+      max-width: min(310px, 70vw);
+      padding: 8px 11px;
+      border: 1px solid var(--primary);
+      border-radius: 9px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.86rem;
+      line-height: 1.25;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.2);
+      transform: translate(12px, 12px);
+    }
+
+    @keyframes shake {
+      0%, 100% { margin-left: 0; }
+      25% { margin-left: -5px; }
+      75% { margin-left: 5px; }
+    }
+
+    @keyframes hint-pulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.36);
+        box-shadow: 0 0 0 9px rgba(249, 223, 99, 0.38), 0 4px 16px rgba(46, 16, 101, 0.32);
+      }
+    }
+
+    .progress-track {
+      height: 7px;
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--correct);
+      transition: width 180ms ease;
+    }
+
+    @media (max-width: 900px) {
+      .game { grid-template-columns: 1fr; }
+      .figure-panel { width: min(100%, 680px); margin: 0 auto; }
+      .practice-panel { position: static; }
+      .label-bank { max-height: none; }
+    }
+
+    @media (max-width: 570px) {
+      .app { width: min(100% - 18px, 1280px); padding-top: 18px; }
+      .topbar { align-items: flex-start; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      .toolbar-actions { width: 100%; }
+      .control { flex: 1; }
+      .label-bank { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1>Cardio, Renal &amp; Pulm Anatomy Figure Matching</h1>
+        <p class="subtitle">Filter by Unit 2 system and switch tabs to study every Dr. Ousley lab handout figure. Click or drag a structure name onto its numbered circle. Press <u>F</u> (or use Find for me) to flash the target for the selected structure.</p>
+      </div>
+      <div class="score" aria-live="polite">
+        <strong id="scoreValue">0 / 0</strong>
+        <span id="scoreLabel">correct</span>
+      </div>
+    </header>
+
+    <div id="systemFilters" class="system-filters" role="group" aria-label="Filter by organ system"></div>
+    <nav id="figureTabs" class="figure-tabs" aria-label="Choose a figure"></nav>
+
+    <div class="toolbar">
+      <div id="status" class="status" role="status" aria-live="polite">Choose a structure to begin.</div>
+      <div class="toolbar-actions">
+        <button id="shuffleButton" class="control" type="button">Shuffle names</button>
+        <button id="retryReviewButton" class="control" type="button" disabled>Retry missed + Find (0)</button>
+        <button id="resetButton" class="control" type="button">Reset round</button>
+      </div>
+    </div>
+
+    <section class="game" aria-label="Anatomy figure matching game">
+      <figure class="figure-panel">
+        <div class="figure-heading">
+          <h2 id="figureTitle"></h2>
+          <span id="figureCount"></span>
+        </div>
+        <div class="image-wrap">
+          <img id="figureImage" class="source-image" src="" width="520" height="580" alt="Numbered anatomy figure">
+          <div id="hotspotLayer" class="hotspot-layer" aria-label="Numbered targets on the figure"></div>
+        </div>
+        <figcaption id="figureNote" class="figure-note"></figcaption>
+      </figure>
+
+      <aside class="practice-panel" aria-label="Matching controls">
+        <h2>Structure bank</h2>
+        <p class="section-note">Select a structure name, then click its number on the figure—or drag the name onto the numbered circle.</p>
+        <button id="findButton" class="control find-control" type="button" aria-keyshortcuts="F" disabled><u>F</u>ind for me</button>
+        <div id="labelBank" class="label-bank"></div>
+
+        <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      const figures = [
+  {
+    "id": "cardio-01",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Thorax in situ",
+    "title": "Thoracic organs in situ (anterior aspect)",
+    "image": "assets/cardio_01.png",
+    "width": 520,
+    "height": 470,
+    "note": "Thoracic organs in situ (anterior aspect). The anterior thoracic wall has been removed.",
+    "answers": [
+      [
+        1,
+        "Trachea"
+      ],
+      [
+        2,
+        "Ascending aorta"
+      ],
+      [
+        3,
+        "Upper lobe of left lung"
+      ],
+      [
+        4,
+        "Right coronary artery"
+      ],
+      [
+        5,
+        "Right ventricle of the heart"
+      ],
+      [
+        6,
+        "Costal margin"
+      ],
+      [
+        7,
+        "Liver"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-02",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Mediastinum divisions",
+    "title": "Divisions of the mediastinum (sagittal schematic)",
+    "image": "assets/cardio_02.png",
+    "width": 520,
+    "height": 529,
+    "note": "Yellow = superior, blue = middle, orange = posterior, pink = anterior mediastinum.",
+    "answers": [
+      [
+        3,
+        "Esophagus"
+      ],
+      [
+        4,
+        "Right atrium of the heart"
+      ],
+      [
+        10,
+        "Pulmonary trunk"
+      ],
+      [
+        11,
+        "Right ventricle of the heart"
+      ],
+      [
+        13,
+        "Trachea"
+      ],
+      [
+        14,
+        "Remaining parts of thymus gland"
+      ],
+      [
+        15,
+        "Ascending aorta"
+      ],
+      [
+        16,
+        "Pericardium"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-04",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Sagittal thorax 5.3",
+    "title": "Sagittal section through thoracic & abdominal cavities \u2014 Fig. 5.3",
+    "image": "assets/cardio_04.png",
+    "width": 520,
+    "height": 833,
+    "note": "Sagittal section through the thoracic and abdominal cavities (parasternal).",
+    "answers": [
+      [
+        1,
+        "Aortic arch"
+      ],
+      [
+        2,
+        "Left atrium of the heart"
+      ],
+      [
+        3,
+        "Esophagus"
+      ],
+      [
+        4,
+        "Right atrium of the heart"
+      ],
+      [
+        5,
+        "Liver"
+      ],
+      [
+        6,
+        "Stomach"
+      ],
+      [
+        7,
+        "Abdominal aorta"
+      ],
+      [
+        8,
+        "Transverse colon (dilated)"
+      ],
+      [
+        9,
+        "Body of lumbar vertebra"
+      ],
+      [
+        10,
+        "Pulmonary trunk"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-05",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Sagittal CT 5.4",
+    "title": "Sagittal section CT scan \u2014 Fig. 5.4",
+    "image": "assets/cardio_05.png",
+    "width": 520,
+    "height": 693,
+    "note": "Sagittal section through the thoracic and abdominal cavities (parasternal, CT scan).",
+    "answers": [
+      [
+        1,
+        "Aortic arch"
+      ],
+      [
+        2,
+        "Left atrium of the heart"
+      ],
+      [
+        3,
+        "Esophagus"
+      ],
+      [
+        4,
+        "Right atrium of the heart"
+      ],
+      [
+        5,
+        "Liver"
+      ],
+      [
+        8,
+        "Transverse colon (dilated)"
+      ],
+      [
+        9,
+        "Body of lumbar vertebra"
+      ],
+      [
+        10,
+        "Pulmonary trunk"
+      ],
+      [
+        12,
+        "Superior mesenteric artery"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-06",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Anterior mediastinum 5.66",
+    "title": "Thoracic organs & anterior mediastinum \u2014 Fig. 5.66",
+    "image": "assets/cardio_06.png",
+    "width": 520,
+    "height": 561,
+    "note": "Thoracic organs (anterior aspect). The ribs, clavicle, and sternum have been partly removed to show the anterior mediastinum and pleura. Red = arteries blue = veins green = lymph vessels and nodes.",
+    "answers": [
+      [
+        2,
+        "Right internal jugular vein"
+      ],
+      [
+        3,
+        "Right common carotid artery"
+      ],
+      [
+        4,
+        "Cephalic vein"
+      ],
+      [
+        5,
+        "Right subclavian vein"
+      ],
+      [
+        6,
+        "Right brachiocephalic vein"
+      ],
+      [
+        7,
+        "Pectoralis major muscle (divided)"
+      ],
+      [
+        8,
+        "Pectoralis minor muscle (divided)"
+      ],
+      [
+        9,
+        "Parasternal lymph nodes"
+      ],
+      [
+        10,
+        "Internal thoracic artery and vein"
+      ],
+      [
+        11,
+        "Anterior margin of costal pleura"
+      ],
+      [
+        12,
+        "Pericardium"
+      ],
+      [
+        13,
+        "Fifth and sixth ribs (divided) and serratus anterior muscle"
+      ],
+      [
+        14,
+        "Costodiaphragmatic recess"
+      ],
+      [
+        15,
+        "External abdominal oblique muscle"
+      ],
+      [
+        16,
+        "Rectus abdominis muscle"
+      ],
+      [
+        17,
+        "Larynx (thyroid cartilage)"
+      ],
+      [
+        18,
+        "Thyroid gland"
+      ],
+      [
+        19,
+        "Trachea"
+      ],
+      [
+        20,
+        "Left vagus nerve"
+      ],
+      [
+        21,
+        "Left brachiocephalic vein"
+      ],
+      [
+        22,
+        "Left internal thoracic artery and vein"
+      ],
+      [
+        23,
+        "Thymus"
+      ],
+      [
+        24,
+        "Costal pleura"
+      ],
+      [
+        25,
+        "Costal margin"
+      ],
+      [
+        26,
+        "Superior epigastric artery"
+      ],
+      [
+        27,
+        "Margin of costal pleura"
+      ],
+      [
+        28,
+        "Diaphragm"
+      ],
+      [
+        29,
+        "Linea alba"
+      ],
+      [
+        30,
+        "Cut edge of anterior sheath of rectus abdominis muscle"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-07",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Heart in situ 5.71",
+    "title": "Heart & middle mediastinum (anterior) \u2014 Fig. 5.71",
+    "image": "assets/cardio_07.png",
+    "width": 520,
+    "height": 587,
+    "note": "Thoracic organs (anterior aspect). Position of the heart and middle mediastinum. The anterior wall of the thorax, the costal pleura, and the pericardium have been removed and the lungs slightly reflected.",
+    "answers": [
+      [
+        1,
+        "Thyroid gland"
+      ],
+      [
+        2,
+        "Phrenic nerve and anterior scalene muscle"
+      ],
+      [
+        3,
+        "Vagus nerve and internal jugular vein"
+      ],
+      [
+        4,
+        "Clavicle (divided)"
+      ],
+      [
+        5,
+        "Brachial plexus and subclavian artery"
+      ],
+      [
+        6,
+        "Subclavian vein"
+      ],
+      [
+        7,
+        "Internal thoracic artery"
+      ],
+      [
+        8,
+        "Brachiocephalic trunk and right brachiocephalic vein"
+      ],
+      [
+        9,
+        "Superior vena cava and thymic vein"
+      ],
+      [
+        10,
+        "Right phrenic nerve"
+      ],
+      [
+        11,
+        "Transverse pericardial sinus (probe)"
+      ],
+      [
+        12,
+        "Right auricle"
+      ],
+      [
+        13,
+        "Middle lobe of right lung"
+      ],
+      [
+        14,
+        "Right ventricle"
+      ],
+      [
+        15,
+        "Cut edge of pericardium"
+      ],
+      [
+        16,
+        "Diaphragm"
+      ],
+      [
+        17,
+        "Internal jugular vein"
+      ],
+      [
+        18,
+        "Trachea"
+      ],
+      [
+        19,
+        "Left recurrent laryngeal nerve"
+      ],
+      [
+        20,
+        "Left common carotid artery and vagus nerve"
+      ],
+      [
+        21,
+        "Left brachiocephalic vein and inferior thyroid vein"
+      ],
+      [
+        22,
+        "Left internal thoracic artery and vein (divided)"
+      ],
+      [
+        23,
+        "Upper margin of pericardial sac"
+      ],
+      [
+        24,
+        "Ascending aorta"
+      ],
+      [
+        25,
+        "Pulmonary trunk"
+      ],
+      [
+        26,
+        "Left phrenic nerve and left pericardiacophrenic artery and vein"
+      ],
+      [
+        27,
+        "Upper lobe of left lung"
+      ],
+      [
+        28,
+        "Left ventricle"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-08",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Heart valves 5.73",
+    "title": "Heart with valves in situ \u2014 Fig. 5.73",
+    "image": "assets/cardio_08.png",
+    "width": 520,
+    "height": 587,
+    "note": "Thoracic organs (anterior aspect). Heart with valves in situ. The anterior wall of the thorax, pleura, and anterior portion of the pericardium have been removed. The right atrium and ventricle have been opened to show the right atrioventricular and pulmonary valves.",
+    "answers": [
+      [
+        1,
+        "Omohyoid muscle"
+      ],
+      [
+        2,
+        "Pyramidal lobe of thyroid gland"
+      ],
+      [
+        3,
+        "Internal jugular vein"
+      ],
+      [
+        4,
+        "Thyroid gland"
+      ],
+      [
+        5,
+        "Right subclavian vein"
+      ],
+      [
+        6,
+        "Brachiocephalic trunk"
+      ],
+      [
+        7,
+        "Right brachiocephalic vein"
+      ],
+      [
+        8,
+        "Right internal thoracic artery"
+      ],
+      [
+        9,
+        "Right phrenic nerve"
+      ],
+      [
+        10,
+        "Superior vena cava"
+      ],
+      [
+        11,
+        "Pulmonary vein"
+      ],
+      [
+        12,
+        "Branches of pulmonary artery"
+      ],
+      [
+        13,
+        "Right auricle"
+      ],
+      [
+        14,
+        "Right atrium"
+      ],
+      [
+        15,
+        "Right atrioventricular (tricuspid) valve"
+      ],
+      [
+        16,
+        "Right lung"
+      ],
+      [
+        17,
+        "Posterior papillary muscle"
+      ],
+      [
+        18,
+        "Diaphragm"
+      ],
+      [
+        19,
+        "Left vagus nerve"
+      ],
+      [
+        20,
+        "Left phrenic nerve"
+      ],
+      [
+        21,
+        "Anterior scalene muscle"
+      ],
+      [
+        22,
+        "Brachial plexus"
+      ],
+      [
+        23,
+        "Thyrocervical trunk"
+      ],
+      [
+        24,
+        "Left common carotid artery"
+      ],
+      [
+        27,
+        "Apex of left lung"
+      ],
+      [
+        28,
+        "Left recurrent laryngeal nerve"
+      ],
+      [
+        29,
+        "Cut edge of pericardium"
+      ],
+      [
+        30,
+        "Pulmonary trunk (fenestrated)"
+      ],
+      [
+        31,
+        "Pulmonic valve"
+      ],
+      [
+        32,
+        "Supraventricular crest"
+      ],
+      [
+        33,
+        "Anterior papillary muscle"
+      ],
+      [
+        34,
+        "Left ventricle"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-09",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Pericardium 5.74",
+    "title": "Pericardium & mediastinum (heart removed) \u2014 Fig. 5.74",
+    "image": "assets/cardio_09.png",
+    "width": 520,
+    "height": 587,
+    "note": "Thoracic organs (anterior aspect). Pericardium and mediastinum. Anterior wall of thorax and heart have been removed and the lungs slightly reflected. Note the probe within the transverse pericardial sinus.",
+    "answers": [
+      [
+        1,
+        "Right internal jugular vein and right vagus nerve"
+      ],
+      [
+        2,
+        "Right phrenic nerve and anterior scalene muscle"
+      ],
+      [
+        3,
+        "Right common carotid artery"
+      ],
+      [
+        4,
+        "Brachial plexus"
+      ],
+      [
+        5,
+        "Right subclavian artery and vein"
+      ],
+      [
+        6,
+        "Right brachiocephalic vein"
+      ],
+      [
+        7,
+        "Right internal thoracic artery (divided)"
+      ],
+      [
+        8,
+        "Brachiocephalic trunk"
+      ],
+      [
+        10,
+        "Superior vena cava"
+      ],
+      [
+        11,
+        "Transverse pericardial sinus (probe)"
+      ],
+      [
+        12,
+        "Right phrenic nerve and right pericardiacophrenic artery and vein"
+      ],
+      [
+        13,
+        "Right pulmonary veins"
+      ],
+      [
+        14,
+        "Oblique sinus of pericardium"
+      ],
+      [
+        15,
+        "Inferior vena cava"
+      ],
+      [
+        16,
+        "Diaphragmatic part of pericardium"
+      ],
+      [
+        17,
+        "Diaphragm"
+      ],
+      [
+        18,
+        "Costal margin"
+      ],
+      [
+        19,
+        "Thyroid gland"
+      ],
+      [
+        20,
+        "Trachea"
+      ],
+      [
+        21,
+        "Left recurrent laryngeal nerve and inferior thyroid vein"
+      ],
+      [
+        22,
+        "Left common carotid artery and left vagus nerve"
+      ],
+      [
+        23,
+        "Left internal thoracic artery and vein (divided)"
+      ],
+      [
+        24,
+        "Vagus nerve at aortic arch"
+      ],
+      [
+        25,
+        "Cut edge of pericardium"
+      ],
+      [
+        26,
+        "Ascending aorta"
+      ],
+      [
+        27,
+        "Pulmonary trunk (divided)"
+      ],
+      [
+        28,
+        "Left pulmonary veins"
+      ],
+      [
+        29,
+        "Left phrenic nerve and left pericardiacophrenic artery and vein"
+      ],
+      [
+        30,
+        "Contour of esophagus beneath pericardium"
+      ],
+      [
+        31,
+        "Contour of aorta beneath pericardium"
+      ],
+      [
+        32,
+        "Pericardium (cut edge)"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-10",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Bronchial tree 5.79",
+    "title": "Bronchial tree in situ (anterior) \u2014 Fig. 5.79",
+    "image": "assets/cardio_10.png",
+    "width": 520,
+    "height": 565,
+    "note": "Bronchial tree in situ (anterior aspect). Heart and pericardium have been removed. The bronchi of the bronchopulmonary segments have been dissected.",
+    "answers": [
+      [
+        1,
+        "Internal jugular vein"
+      ],
+      [
+        2,
+        "Right vagus nerve"
+      ],
+      [
+        3,
+        "Thyroid gland"
+      ],
+      [
+        4,
+        "Right recurrent laryngeal nerve"
+      ],
+      [
+        5,
+        "Brachiocephalic trunk"
+      ],
+      [
+        6,
+        "Trachea"
+      ],
+      [
+        7,
+        "Bifurcation of trachea"
+      ],
+      [
+        10,
+        "Diaphragm"
+      ],
+      [
+        11,
+        "Left subclavian artery"
+      ],
+      [
+        12,
+        "Left common carotid artery"
+      ],
+      [
+        13,
+        "Left vagus nerve"
+      ],
+      [
+        14,
+        "Aortic arch"
+      ],
+      [
+        15,
+        "Esophagus"
+      ],
+      [
+        16,
+        "Esophageal plexus"
+      ],
+      [
+        17,
+        "Thoracic aorta"
+      ],
+      [
+        18,
+        "Left phrenic nerve"
+      ],
+      [
+        19,
+        "Pericardium at the central tendon of diaphragm"
+      ]
+    ]
+  },
+  {
+    "id": "cardio-11",
+    "system": "cardio",
+    "systemLabel": "Cardiovascular",
+    "tab": "Posterior mediastinum 5.85",
+    "title": "Posterior mediastinum: aorta, esophagus & vagus \u2014 Fig. 5.85",
+    "image": "assets/cardio_11.png",
+    "width": 520,
+    "height": 648,
+    "note": "Posterior mediastinum (anterior aspect). Dissection of thoracic aorta and esophagus with vagus nerve branches.",
+    "answers": [
+      [
+        1,
+        "Right vagus nerve"
+      ],
+      [
+        2,
+        "Thyroid gland and trachea"
+      ],
+      [
+        3,
+        "Intercostal nerve"
+      ],
+      [
+        4,
+        "Aortic arch"
+      ],
+      [
+        5,
+        "Azygos vein"
+      ],
+      [
+        6,
+        "Posterior intercostal artery"
+      ],
+      [
+        7,
+        "Greater splanchnic nerve"
+      ],
+      [
+        8,
+        "Diaphragm"
+      ],
+      [
+        9,
+        "Liver"
+      ],
+      [
+        10,
+        "Proper hepatic artery and hepatic plexus"
+      ],
+      [
+        11,
+        "Left recurrent laryngeal nerve"
+      ],
+      [
+        12,
+        "Inferior cervical cardiac nerves"
+      ],
+      [
+        13,
+        "Left vagus nerve and left recurrent laryngeal nerve"
+      ],
+      [
+        14,
+        "Left primary bronchus"
+      ],
+      [
+        15,
+        "Thoracic aorta and left vagus nerve"
+      ],
+      [
+        16,
+        "Esophagus and esophageal plexus"
+      ],
+      [
+        17,
+        "Thoracic duct"
+      ],
+      [
+        18,
+        "Spleen"
+      ],
+      [
+        19,
+        "Anterior gastric plexus and stomach (divided)"
+      ],
+      [
+        20,
+        "Splenic artery and splenic plexus"
+      ],
+      [
+        21,
+        "Celiac trunk and celiac plexus"
+      ],
+      [
+        22,
+        "Pancreas"
+      ]
+    ]
+  },
+  {
+    "id": "renal-01",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Female retroperitoneum 7.1",
+    "title": "Retroperitoneal organs of the female in situ \u2014 Fig. 7.1",
+    "image": "assets/renal_01.png",
+    "width": 520,
+    "height": 639,
+    "note": "Retroperitoneal organs of the female in situ (anterior aspect). View of the female pelvis showing the uterus with uterine ligaments, ovary, and urinary bladder.",
+    "answers": [
+      [
+        1,
+        "Kidney"
+      ],
+      [
+        2,
+        "Ureter"
+      ],
+      [
+        3,
+        "Inferior vena cava"
+      ],
+      [
+        4,
+        "Abdominal aorta"
+      ],
+      [
+        5,
+        "Ovary"
+      ],
+      [
+        6,
+        "Uterine tube"
+      ],
+      [
+        7,
+        "Uterus"
+      ],
+      [
+        8,
+        "Round ligament of uterus and inguinal canal"
+      ],
+      [
+        9,
+        "Urinary bladder"
+      ]
+    ]
+  },
+  {
+    "id": "renal-02",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Left kidney sagittal 7.3",
+    "title": "Parasagittal section at level of left kidney \u2014 Fig. 7.3",
+    "image": "assets/renal_02.png",
+    "width": 520,
+    "height": 737,
+    "note": "Parasagittal section through thoracic and abdominal cavities at the level of the left kidney 5.5 cm left to the median plane.",
+    "answers": [
+      [
+        15,
+        "Spleen"
+      ],
+      [
+        16,
+        "Splenic artery and vein, and pancreas"
+      ],
+      [
+        17,
+        "Left kidney"
+      ],
+      [
+        18,
+        "Psoas major muscle"
+      ]
+    ]
+  },
+  {
+    "id": "renal-03",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Urinary posterior 7.4",
+    "title": "Positions of urinary organs (posterior aspect) \u2014 Fig. 7.4",
+    "image": "assets/renal_03.png",
+    "width": 520,
+    "height": 684,
+    "note": "Positions of urinary organs (posterior aspect). Notice that the upper part of the kidney reaches the level of the margin of the pleura and lung.",
+    "answers": [
+      [
+        17,
+        "Left kidney"
+      ],
+      [
+        19,
+        "Margin of lung"
+      ],
+      [
+        20,
+        "Margin of pleura"
+      ],
+      [
+        21,
+        "Renal pelvis"
+      ],
+      [
+        22,
+        "Left ureter"
+      ],
+      [
+        23,
+        "Descending colon"
+      ],
+      [
+        24,
+        "Rectum"
+      ],
+      [
+        25,
+        "Suprarenal gland"
+      ],
+      [
+        26,
+        "Twelfth rib"
+      ],
+      [
+        27,
+        "Pancreas"
+      ],
+      [
+        28,
+        "Right kidney"
+      ],
+      [
+        29,
+        "Ascending colon"
+      ],
+      [
+        30,
+        "Right ureter"
+      ],
+      [
+        31,
+        "Cecum"
+      ],
+      [
+        32,
+        "Vermiform appendix"
+      ],
+      [
+        33,
+        "Urinary bladder"
+      ]
+    ]
+  },
+  {
+    "id": "renal-04",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Abdomen CT 7.5",
+    "title": "Horizontal section through abdominal cavity (CT) \u2014 Fig. 7.5",
+    "image": "assets/renal_04.png",
+    "width": 520,
+    "height": 409,
+    "note": "Horizontal section through the abdominal cavity (CT scan).",
+    "answers": [
+      [
+        17,
+        "Left kidney"
+      ],
+      [
+        28,
+        "Right kidney"
+      ],
+      [
+        34,
+        "Inferior vena cava"
+      ],
+      [
+        35,
+        "Body of lumbar vertebra (L1)"
+      ],
+      [
+        37,
+        "Superior mesenteric artery"
+      ],
+      [
+        38,
+        "Abdominal aorta"
+      ]
+    ]
+  },
+  {
+    "id": "renal-05",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Kidney coronal 7.6",
+    "title": "Coronal section through right kidney & suprarenal gland \u2014 Fig. 7.6",
+    "image": "assets/renal_05.png",
+    "width": 520,
+    "height": 580,
+    "note": "Coronal section through right kidney and suprarenal gland (posterior aspect). The renal pelvis has been opened and the fatty tissue removed to display the renal vessels.",
+    "answers": [
+      [
+        1,
+        "Renal vein"
+      ],
+      [
+        2,
+        "Renal artery"
+      ],
+      [
+        3,
+        "Renal pelvis"
+      ],
+      [
+        4,
+        "Abdominal part of ureter"
+      ],
+      [
+        5,
+        "Major renal calyx"
+      ],
+      [
+        6,
+        "Cribriform area of renal papilla"
+      ],
+      [
+        7,
+        "Cortex of suprarenal gland"
+      ],
+      [
+        8,
+        "Medulla of suprarenal gland"
+      ],
+      [
+        9,
+        "Cortex of kidney"
+      ],
+      [
+        10,
+        "Medulla of kidney"
+      ],
+      [
+        11,
+        "Renal papilla"
+      ],
+      [
+        12,
+        "Minor renal calyx"
+      ],
+      [
+        13,
+        "Renal sinus"
+      ],
+      [
+        14,
+        "Renal columns"
+      ],
+      [
+        15,
+        "Fibrous capsule of kidney"
+      ]
+    ]
+  },
+  {
+    "id": "renal-06",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Kidneys in situ 7.9",
+    "title": "Retroperitoneal organs, kidneys & suprarenal glands \u2014 Fig. 7.9",
+    "image": "assets/renal_06.png",
+    "width": 520,
+    "height": 420,
+    "note": "Retroperitoneal organs, kidneys, and suprarenal glands in situ (anterior aspect). Red = arteries blue = veins.",
+    "answers": [
+      [
+        2,
+        "Hepatic veins"
+      ],
+      [
+        3,
+        "Inferior vena cava"
+      ],
+      [
+        4,
+        "Common hepatic artery"
+      ],
+      [
+        5,
+        "Suprarenal gland"
+      ],
+      [
+        6,
+        "Celiac trunk"
+      ],
+      [
+        7,
+        "Right renal vein"
+      ],
+      [
+        8,
+        "Kidney"
+      ],
+      [
+        9,
+        "Abdominal aorta"
+      ],
+      [
+        10,
+        "Subcostal nerve"
+      ],
+      [
+        12,
+        "Central tendon of diaphragm"
+      ],
+      [
+        13,
+        "Inferior phrenic artery"
+      ],
+      [
+        14,
+        "Cardiac part of stomach"
+      ],
+      [
+        15,
+        "Spleen"
+      ],
+      [
+        16,
+        "Splenic artery"
+      ],
+      [
+        17,
+        "Superior renal artery"
+      ],
+      [
+        18,
+        "Superior mesenteric artery"
+      ],
+      [
+        19,
+        "Psoas major muscle"
+      ],
+      [
+        20,
+        "Inferior mesenteric artery"
+      ],
+      [
+        21,
+        "Ureter"
+      ]
+    ]
+  },
+  {
+    "id": "renal-07",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Renal arteriograph 7.14",
+    "title": "Arteriograph of abdominal aorta & renal vessels \u2014 Fig. 7.14",
+    "image": "assets/renal_07.png",
+    "width": 520,
+    "height": 458,
+    "note": "Arteriograph of abdominal aorta with renal arteries and renal vessels.",
+    "answers": [
+      [
+        16,
+        "Renal artery"
+      ],
+      [
+        17,
+        "Posterior branch of renal artery"
+      ],
+      [
+        20,
+        "Upper pole of kidney"
+      ],
+      [
+        21,
+        "Anterior superior segmental artery of renal artery"
+      ],
+      [
+        22,
+        "Anterior segmental artery of renal artery"
+      ],
+      [
+        23,
+        "Lower pole of kidney"
+      ],
+      [
+        24,
+        "Abdominal aorta (with catheter)"
+      ],
+      [
+        25,
+        "Common iliac artery"
+      ]
+    ]
+  },
+  {
+    "id": "renal-08",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Left kidney open 7.15",
+    "title": "Left kidney & suprarenal gland in situ \u2014 Fig. 7.15",
+    "image": "assets/renal_08.png",
+    "width": 520,
+    "height": 621,
+    "note": "Left kidney and suprarenal gland in situ. The anterior cortical layer of the kidney has been removed to display the renal pelvis and papillae.",
+    "answers": [
+      [
+        1,
+        "Hepatic vein"
+      ],
+      [
+        2,
+        "Anterior and posterior vagal trunk"
+      ],
+      [
+        3,
+        "Inferior vena cava"
+      ],
+      [
+        4,
+        "Lumbar part of diaphragm"
+      ],
+      [
+        5,
+        "Right greater and lesser splanchnic nerves"
+      ],
+      [
+        6,
+        "Celiac trunk"
+      ],
+      [
+        7,
+        "Celiac ganglion and plexus"
+      ],
+      [
+        8,
+        "Superior mesenteric artery"
+      ],
+      [
+        9,
+        "Left renal vein"
+      ],
+      [
+        10,
+        "Right sympathetic trunk and ganglion"
+      ],
+      [
+        11,
+        "Abdominal aorta"
+      ],
+      [
+        12,
+        "Left sympathetic trunk"
+      ],
+      [
+        13,
+        "Esophagus (cut) and left greater splanchnic nerve"
+      ],
+      [
+        14,
+        "Left suprarenal gland"
+      ],
+      [
+        15,
+        "Left renal artery"
+      ],
+      [
+        16,
+        "Renal pelvis"
+      ],
+      [
+        17,
+        "Renal papilla with minor calyx"
+      ],
+      [
+        18,
+        "Left testicular vein"
+      ],
+      [
+        19,
+        "Ureter"
+      ],
+      [
+        20,
+        "Psoas major muscle"
+      ],
+      [
+        21,
+        "Quadratus lumborum muscle"
+      ]
+    ]
+  },
+  {
+    "id": "renal-09",
+    "system": "renal",
+    "systemLabel": "Renal",
+    "tab": "Male urinary 7.19",
+    "title": "Urinary system in the male (anterior aspect) \u2014 Fig. 7.19",
+    "image": "assets/renal_09.png",
+    "width": 520,
+    "height": 725,
+    "note": "Urinary system in the male (anterior aspect). The peritoneum has been removed.",
+    "answers": [
+      [
+        1,
+        "Diaphragm"
+      ],
+      [
+        2,
+        "Inferior vena cava"
+      ],
+      [
+        3,
+        "Suprarenal gland"
+      ],
+      [
+        4,
+        "Kidney"
+      ],
+      [
+        5,
+        "Superior mesenteric artery"
+      ],
+      [
+        6,
+        "Ureter"
+      ],
+      [
+        7,
+        "Right spermatic vein"
+      ],
+      [
+        8,
+        "Psoas major muscle"
+      ],
+      [
+        9,
+        "Spleen"
+      ],
+      [
+        11,
+        "Abdominal aorta"
+      ],
+      [
+        12,
+        "Splenic artery"
+      ],
+      [
+        13,
+        "Celiac trunk and celiac ganglion"
+      ],
+      [
+        14,
+        "Renal artery and vein"
+      ],
+      [
+        15,
+        "Left spermatic vein"
+      ],
+      [
+        18,
+        "Left common iliac artery"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-01",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Pharynx lateral 8.144",
+    "title": "Pharynx & constrictor muscles (lateral) \u2014 Fig. 8.144",
+    "image": "assets/pulm_01.png",
+    "width": 520,
+    "height": 497,
+    "note": "The mandible has been partly removed.",
+    "answers": [
+      [
+        1,
+        "Maxilla"
+      ],
+      [
+        2,
+        "Pterygomandibular raphe"
+      ],
+      [
+        3,
+        "Buccinator muscle"
+      ],
+      [
+        4,
+        "Mandible (divided)"
+      ],
+      [
+        5,
+        "Depressor anguli oris muscle"
+      ],
+      [
+        6,
+        "Mylohyoid muscle"
+      ],
+      [
+        7,
+        "Anterior belly of digastric muscle"
+      ],
+      [
+        8,
+        "Hyoid bone"
+      ],
+      [
+        9,
+        "Thyroid cartilage"
+      ],
+      [
+        10,
+        "Cricothyroid muscle"
+      ],
+      [
+        11,
+        "Styloid process"
+      ],
+      [
+        12,
+        "Medial pterygoid muscle (divided)"
+      ],
+      [
+        13,
+        "Posterior belly of digastric muscle"
+      ],
+      [
+        14,
+        "Styloglossus muscle"
+      ],
+      [
+        15,
+        "Stylohyoid muscle"
+      ],
+      [
+        16,
+        "Thyropharyngeal part of inferior constrictor muscle of pharynx"
+      ],
+      [
+        17,
+        "Thyrohyoid muscle"
+      ],
+      [
+        18,
+        "Cricopharyngeal part of inferior constrictor muscle of pharynx"
+      ],
+      [
+        19,
+        "Esophagus"
+      ],
+      [
+        20,
+        "Trachea"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-02",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Pharynx & nerves 8.145",
+    "title": "Pharynx, oral cavity & cranial nerves \u2014 Fig. 8.145",
+    "image": "assets/pulm_02.png",
+    "width": 520,
+    "height": 445,
+    "note": "the face and the mandible have been removed and the oral cavity opened. Arrow = submandibular duct.",
+    "answers": [
+      [
+        1,
+        "Styloid process"
+      ],
+      [
+        2,
+        "Styloglossus muscle"
+      ],
+      [
+        3,
+        "Posterior belly of digastric muscle"
+      ],
+      [
+        4,
+        "Vagus nerve (CN X)"
+      ],
+      [
+        5,
+        "Lingual nerve (CN V3)"
+      ],
+      [
+        6,
+        "Glossopharyngeal nerve (CN IX)"
+      ],
+      [
+        7,
+        "Submandibular ganglion"
+      ],
+      [
+        8,
+        "Hyoglossus muscle"
+      ],
+      [
+        9,
+        "Hypoglossal nerve (CN XII)"
+      ],
+      [
+        10,
+        "Stylohyoid muscle"
+      ],
+      [
+        11,
+        "Internal branch of superior laryngeal nerve (branch of vagus nerve, not visible)"
+      ],
+      [
+        12,
+        "Middle constrictor muscle of pharynx"
+      ],
+      [
+        13,
+        "Omohyoid muscle (divided)"
+      ],
+      [
+        14,
+        "Thyrohyoid muscle"
+      ],
+      [
+        15,
+        "Sternothyroid muscle"
+      ],
+      [
+        16,
+        "Esophagus"
+      ],
+      [
+        17,
+        "Parotid duct (divided)"
+      ],
+      [
+        18,
+        "Buccinator muscle"
+      ],
+      [
+        19,
+        "Superior constrictor muscle of pharynx"
+      ],
+      [
+        20,
+        "Tongue"
+      ],
+      [
+        21,
+        "Terminal branches of lingual nerve"
+      ],
+      [
+        22,
+        "Mandible (divided)"
+      ],
+      [
+        23,
+        "Genioglossus and geniohyoid muscles"
+      ],
+      [
+        24,
+        "Mylohyoid muscle (divided and reflected)"
+      ],
+      [
+        25,
+        "Sternohyoid muscle (divided)"
+      ],
+      [
+        26,
+        "Thyroid cartilage"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-03",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Pharynx posterior 8.148",
+    "title": "Pharynx (posterior aspect: Killian's & Laimer's) \u2014 Fig. 8.148",
+    "image": "assets/pulm_03.png",
+    "width": 520,
+    "height": 551,
+    "note": "1 Sella turcica 2 Internal acoustic meatus and petrous part of temporal bone 3 Pharyngobasilar fascia 4 Fibrous raphe of pharynx 5 Stylopharyngeal muscle 6 Superior constrictor muscle of pharynx 7 Posterior belly of digastric muscle 8 Stylohyoid muscle 9 Middle constrictor muscle of pharynx 10 Inferior constrictor muscle of pharynx 11 Muscle-free area (Killian\u2019s triangle) 12 Esophagus 13 Trachea 14 Thyroid and parathyroid glands 15 Medial pterygoid muscle 16 Greater horn of hyoid bone 17 Internal jugular vein 18 Parotid gland 19 Accessory nerve 20 Superior cervical ganglion of sympathetic trunk 21 Vagus nerve 22 Laimer\u2019s triangle (area prone to developing diverticula) 23 Orbicularis oculi muscle 24 Nasalis muscle 25 Levator labii superioris and levator labii alaeque nasi muscles 26 Levator anguli oris muscle 27 Orbicularis oris muscle 28 Buccinator muscle 29 Depressor labii inferioris muscle 30 Hyoglossus muscle 31 Thyrohyoid muscle 32 Thyroid cartilage 33 Cricothyroid muscle 34 Pterygomandibular raphe 35 Tensor veli palatini muscle 36 Levator veli palatini muscle 37 Depressor anguli oris muscle 38 Mentalis muscle 39 Styloglossus muscle",
+    "answers": [
+      [
+        2,
+        "Internal acoustic meatus and petrous part of temporal bone"
+      ],
+      [
+        3,
+        "Pharyngobasilar fascia"
+      ],
+      [
+        4,
+        "Fibrous raphe of pharynx"
+      ],
+      [
+        5,
+        "Stylopharyngeal muscle"
+      ],
+      [
+        6,
+        "Superior constrictor muscle of pharynx"
+      ],
+      [
+        7,
+        "Posterior belly of digastric muscle"
+      ],
+      [
+        8,
+        "Stylohyoid muscle"
+      ],
+      [
+        9,
+        "Middle constrictor muscle of pharynx"
+      ],
+      [
+        10,
+        "Inferior constrictor muscle of pharynx"
+      ],
+      [
+        11,
+        "Muscle-free area (Killian\u2019s triangle)"
+      ],
+      [
+        12,
+        "Esophagus"
+      ],
+      [
+        13,
+        "Trachea"
+      ],
+      [
+        16,
+        "Greater horn of hyoid bone"
+      ],
+      [
+        17,
+        "Internal jugular vein"
+      ],
+      [
+        18,
+        "Parotid gland"
+      ],
+      [
+        19,
+        "Accessory nerve"
+      ],
+      [
+        20,
+        "Superior cervical ganglion of sympathetic trunk"
+      ],
+      [
+        21,
+        "Vagus nerve"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-04",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Larynx posterior 8.163",
+    "title": "Laryngeal muscles & larynx (posterior aspect) \u2014 Fig. 8.163",
+    "image": "assets/pulm_04.png",
+    "width": 520,
+    "height": 896,
+    "note": "Laryngeal muscles and larynx (posterior aspect).",
+    "answers": [
+      [
+        1,
+        "Hyoglossus muscle"
+      ],
+      [
+        2,
+        "Hyoid bone"
+      ],
+      [
+        3,
+        "Epiglottis"
+      ],
+      [
+        6,
+        "Superior laryngeal nerve"
+      ],
+      [
+        7,
+        "Transverse arytenoid muscle"
+      ],
+      [
+        8,
+        "Posterior crico-arytenoid muscle"
+      ],
+      [
+        9,
+        "Transverse muscle of trachea"
+      ],
+      [
+        10,
+        "Ary-epiglottic fold"
+      ],
+      [
+        12,
+        "Thyroid cartilage"
+      ],
+      [
+        16,
+        "Inferior laryngeal nerve (branch of recurrent nerve)"
+      ],
+      [
+        22,
+        "Cricothyroid muscle"
+      ],
+      [
+        24,
+        "Cuneiform tubercle"
+      ],
+      [
+        25,
+        "Corniculate tubercle"
+      ],
+      [
+        26,
+        "Ary-epiglottic muscle"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-05",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Larynx lateral 8.161",
+    "title": "Laryngeal muscles & vocal ligament (lateral) \u2014 Fig. 8.161",
+    "image": "assets/pulm_05.png",
+    "width": 520,
+    "height": 870,
+    "note": "Laryngeal muscles (lateral aspect). Dissection of the vocal ligament. Half of the thyroid cartilage has been removed.",
+    "answers": [
+      [
+        1,
+        "Hyoglossus muscle"
+      ],
+      [
+        2,
+        "Hyoid bone"
+      ],
+      [
+        3,
+        "Epiglottis"
+      ],
+      [
+        4,
+        "Thyrohyoid membrane"
+      ],
+      [
+        5,
+        "Superior cornu of thyroid cartilage"
+      ],
+      [
+        6,
+        "Superior laryngeal nerve"
+      ],
+      [
+        7,
+        "Transverse arytenoid muscle"
+      ],
+      [
+        8,
+        "Posterior crico-arytenoid muscle"
+      ],
+      [
+        12,
+        "Thyroid cartilage"
+      ],
+      [
+        13,
+        "Lateral crico-arytenoid muscle"
+      ],
+      [
+        14,
+        "Cricoid cartilage"
+      ],
+      [
+        16,
+        "Inferior laryngeal nerve (branch of recurrent nerve)"
+      ],
+      [
+        17,
+        "Trachea"
+      ],
+      [
+        18,
+        "Arytenoid cartilage"
+      ],
+      [
+        20,
+        "Vocalis muscle (part of thyro-arytenoid muscle)"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-06",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Lungs medial 5.17",
+    "title": "Right & left lungs (medial aspect) \u2014 Fig. 5.17",
+    "image": "assets/pulm_06.png",
+    "width": 520,
+    "height": 271,
+    "note": "Right lung (medial aspect). Left lung (medial aspect).",
+    "answers": [
+      [
+        2,
+        "Upper lobe of right lung"
+      ],
+      [
+        3,
+        "Horizontal fissure of right lung"
+      ],
+      [
+        4,
+        "Oblique fissure of right lung"
+      ],
+      [
+        5,
+        "Middle lobe of right lung"
+      ],
+      [
+        12,
+        "Groove of subclavian artery"
+      ],
+      [
+        13,
+        "Groove of azygos arch"
+      ],
+      [
+        14,
+        "Branches of right pulmonary artery"
+      ],
+      [
+        15,
+        "Bronchi"
+      ],
+      [
+        16,
+        "Right pulmonary veins"
+      ],
+      [
+        17,
+        "Pulmonary ligament"
+      ],
+      [
+        18,
+        "Diaphragmatic surface"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-07",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Post. mediastinum 5.78",
+    "title": "Posterior mediastinum (heart removed) \u2014 Fig. 5.78",
+    "image": "assets/pulm_07.png",
+    "width": 520,
+    "height": 586,
+    "note": "Posterior mediastinum (anterior aspect). Heart and pericardium have been removed. Both lungs have been slightly reflected.",
+    "answers": [
+      [
+        1,
+        "Supraclavicular nerves"
+      ],
+      [
+        2,
+        "Internal jugular vein"
+      ],
+      [
+        3,
+        "Omohyoid muscle"
+      ],
+      [
+        4,
+        "Right vagus nerve"
+      ],
+      [
+        5,
+        "Right common carotid artery"
+      ],
+      [
+        6,
+        "Right subclavian artery"
+      ],
+      [
+        7,
+        "Brachiocephalic trunk"
+      ],
+      [
+        8,
+        "Right brachiocephalic vein"
+      ],
+      [
+        9,
+        "Superior cervical cardiac branch of vagus nerve"
+      ],
+      [
+        10,
+        "Inferior cervical cardiac branches of vagus nerve"
+      ],
+      [
+        12,
+        "Bifurcation of trachea"
+      ],
+      [
+        13,
+        "Right pulmonary artery"
+      ],
+      [
+        14,
+        "Right pulmonary veins"
+      ],
+      [
+        15,
+        "Right lung"
+      ],
+      [
+        16,
+        "Esophagus and branches of right vagus nerve"
+      ],
+      [
+        17,
+        "Inferior vena cava"
+      ],
+      [
+        18,
+        "Pericardium"
+      ],
+      [
+        19,
+        "Larynx (thyroid cartilage, cricothyroid muscle)"
+      ],
+      [
+        20,
+        "Thyroid gland"
+      ],
+      [
+        21,
+        "Internal jugular vein"
+      ],
+      [
+        22,
+        "Esophagus and left recurrent laryngeal nerve"
+      ],
+      [
+        23,
+        "Trachea"
+      ],
+      [
+        24,
+        "Left vagus nerve"
+      ],
+      [
+        25,
+        "Left common carotid artery"
+      ],
+      [
+        26,
+        "Aortic arch"
+      ],
+      [
+        27,
+        "Left recurrent laryngeal nerve branching off from vagus nerve"
+      ],
+      [
+        28,
+        "Left pulmonary veins"
+      ],
+      [
+        31,
+        "Left phrenic nerve (divided)"
+      ]
+    ]
+  },
+  {
+    "id": "pulm-08",
+    "system": "pulm",
+    "systemLabel": "Respiratory",
+    "tab": "Lungs in situ 5.69",
+    "title": "Thoracic organs: pleura opened & lungs exposed \u2014 Fig. 5.69",
+    "image": "assets/pulm_08.png",
+    "width": 520,
+    "height": 611,
+    "note": "Thoracic organs (anterior aspect). The pleura has been opened and the lungs exposed. Remnants of the thymus and pericardium are seen.",
+    "answers": [
+      [
+        1,
+        "Right internal jugular vein"
+      ],
+      [
+        2,
+        "Phrenic nerve and anterior scalene muscle"
+      ],
+      [
+        3,
+        "Clavicle (divided)"
+      ],
+      [
+        4,
+        "Right subclavian artery and vein"
+      ],
+      [
+        5,
+        "Internal thoracic artery"
+      ],
+      [
+        6,
+        "Right brachiocephalic vein"
+      ],
+      [
+        7,
+        "Brachiocephalic trunk"
+      ],
+      [
+        8,
+        "Thymus (atrophic)"
+      ],
+      [
+        9,
+        "Upper lobe of right lung"
+      ],
+      [
+        10,
+        "Horizontal fissure of right lung (incomplete)"
+      ],
+      [
+        11,
+        "Middle lobe of right lung"
+      ],
+      [
+        12,
+        "Oblique fissure of right lung"
+      ],
+      [
+        13,
+        "Lower lobe of right lung"
+      ],
+      [
+        14,
+        "Xiphoid process"
+      ],
+      [
+        15,
+        "Diaphragm"
+      ],
+      [
+        16,
+        "Thyroid gland"
+      ],
+      [
+        17,
+        "Left internal jugular vein"
+      ],
+      [
+        18,
+        "Brachial plexus"
+      ],
+      [
+        19,
+        "Left cephalic vein"
+      ],
+      [
+        20,
+        "Left common carotid artery and vagus nerve"
+      ],
+      [
+        21,
+        "Left brachiocephalic vein"
+      ],
+      [
+        22,
+        "Internal thoracic artery and vein (divided)"
+      ],
+      [
+        23,
+        "Ascending aorta and aortic arch"
+      ],
+      [
+        24,
+        "Upper lobe of left lung"
+      ],
+      [
+        25,
+        "Pericardium"
+      ],
+      [
+        26,
+        "Oblique fissure of left lung"
+      ],
+      [
+        27,
+        "Lower lobe of left lung"
+      ],
+      [
+        28,
+        "Costal margin"
+      ]
+    ]
+  }
+];
+      const targetPoints = {
+  "cardio-01": [
+    [
+      1,
+      513.5,
+      70.5,
+      "right"
+    ],
+    [
+      2,
+      513.5,
+      176.5,
+      "right"
+    ],
+    [
+      3,
+      513.5,
+      212.5,
+      "right"
+    ],
+    [
+      4,
+      508.0,
+      244.0,
+      "right"
+    ],
+    [
+      5,
+      513.0,
+      285.5,
+      "right"
+    ],
+    [
+      6,
+      513.0,
+      372.5,
+      "right"
+    ],
+    [
+      7,
+      513.5,
+      433.5,
+      "right"
+    ]
+  ],
+  "cardio-02": [
+    [
+      13,
+      116.2,
+      43.4,
+      "left"
+    ],
+    [
+      14,
+      30.4,
+      187.2,
+      "left"
+    ],
+    [
+      15,
+      30.0,
+      217.6,
+      "left"
+    ],
+    [
+      16,
+      30.0,
+      259.5,
+      "left"
+    ],
+    [
+      11,
+      28.8,
+      329.5,
+      "left"
+    ],
+    [
+      10,
+      488.5,
+      226.4,
+      "right"
+    ],
+    [
+      4,
+      486.9,
+      302.6,
+      "right"
+    ],
+    [
+      3,
+      484.6,
+      341.8,
+      "right"
+    ]
+  ],
+  "cardio-04": [
+    [
+      1,
+      504.5,
+      138.0,
+      "right"
+    ],
+    [
+      10,
+      511.0,
+      195.0,
+      "right"
+    ],
+    [
+      2,
+      505.5,
+      250.0,
+      "right"
+    ],
+    [
+      3,
+      505.5,
+      327.0,
+      "right"
+    ],
+    [
+      4,
+      505.0,
+      356.5,
+      "right"
+    ],
+    [
+      5,
+      505.5,
+      418.5,
+      "right"
+    ],
+    [
+      6,
+      505.5,
+      527.5,
+      "right"
+    ],
+    [
+      7,
+      505.5,
+      578.5,
+      "right"
+    ],
+    [
+      8,
+      505.5,
+      688.5,
+      "right"
+    ],
+    [
+      9,
+      505.0,
+      755.0,
+      "right"
+    ]
+  ],
+  "cardio-05": [
+    [
+      4,
+      31.0,
+      272.5,
+      "left"
+    ],
+    [
+      5,
+      23.5,
+      356.0,
+      "left"
+    ],
+    [
+      8,
+      23.5,
+      423.5,
+      "left"
+    ],
+    [
+      1,
+      501.5,
+      109.0,
+      "right"
+    ],
+    [
+      10,
+      506.5,
+      170.5,
+      "right"
+    ],
+    [
+      2,
+      502.5,
+      216.0,
+      "right"
+    ],
+    [
+      3,
+      494.5,
+      322.5,
+      "right"
+    ],
+    [
+      12,
+      506.5,
+      430.0,
+      "right"
+    ],
+    [
+      9,
+      502.0,
+      515.5,
+      "right"
+    ]
+  ],
+  "cardio-06": [
+    [
+      2,
+      9.0,
+      78.5,
+      "left"
+    ],
+    [
+      3,
+      9.0,
+      105.5,
+      "left"
+    ],
+    [
+      4,
+      9.5,
+      115.5,
+      "left"
+    ],
+    [
+      5,
+      9.0,
+      126.5,
+      "left"
+    ],
+    [
+      6,
+      8.5,
+      134.5,
+      "left"
+    ],
+    [
+      7,
+      9.0,
+      158.5,
+      "left"
+    ],
+    [
+      8,
+      9.0,
+      190.5,
+      "left"
+    ],
+    [
+      9,
+      8.5,
+      213.5,
+      "left"
+    ],
+    [
+      10,
+      7.5,
+      251.5,
+      "left"
+    ],
+    [
+      11,
+      7.0,
+      279.5,
+      "left"
+    ],
+    [
+      12,
+      7.0,
+      297.5,
+      "left"
+    ],
+    [
+      13,
+      7.0,
+      326.5,
+      "left"
+    ],
+    [
+      14,
+      7.0,
+      401.5,
+      "left"
+    ],
+    [
+      15,
+      9.5,
+      420.5,
+      "left"
+    ],
+    [
+      16,
+      7.0,
+      475.5,
+      "left"
+    ],
+    [
+      17,
+      510.5,
+      46.0,
+      "right"
+    ],
+    [
+      18,
+      507.5,
+      69.5,
+      "right"
+    ],
+    [
+      19,
+      511.0,
+      86.5,
+      "right"
+    ],
+    [
+      20,
+      510.5,
+      106.0,
+      "right"
+    ],
+    [
+      21,
+      510.5,
+      123.0,
+      "right"
+    ],
+    [
+      22,
+      510.0,
+      158.0,
+      "right"
+    ],
+    [
+      23,
+      510.5,
+      181.0,
+      "right"
+    ],
+    [
+      24,
+      510.0,
+      258.5,
+      "right"
+    ],
+    [
+      25,
+      510.5,
+      369.5,
+      "right"
+    ],
+    [
+      26,
+      506.5,
+      421.0,
+      "right"
+    ],
+    [
+      27,
+      510.5,
+      437.5,
+      "right"
+    ],
+    [
+      28,
+      510.0,
+      454.5,
+      "right"
+    ],
+    [
+      29,
+      510.5,
+      480.5,
+      "right"
+    ],
+    [
+      30,
+      510.5,
+      511.5,
+      "right"
+    ]
+  ],
+  "cardio-07": [
+    [
+      1,
+      12.5,
+      46.5,
+      "left"
+    ],
+    [
+      2,
+      13.0,
+      61.5,
+      "left"
+    ],
+    [
+      3,
+      13.0,
+      77.0,
+      "left"
+    ],
+    [
+      4,
+      13.0,
+      89.0,
+      "left"
+    ],
+    [
+      5,
+      16.5,
+      107.0,
+      "left"
+    ],
+    [
+      6,
+      12.5,
+      132.0,
+      "left"
+    ],
+    [
+      7,
+      13.0,
+      157.0,
+      "left"
+    ],
+    [
+      8,
+      12.5,
+      167.0,
+      "left"
+    ],
+    [
+      9,
+      12.5,
+      217.5,
+      "left"
+    ],
+    [
+      10,
+      11.0,
+      244.5,
+      "left"
+    ],
+    [
+      11,
+      10.5,
+      258.5,
+      "left"
+    ],
+    [
+      12,
+      14.5,
+      297.5,
+      "left"
+    ],
+    [
+      13,
+      15.0,
+      351.2,
+      "left"
+    ],
+    [
+      14,
+      15.0,
+      353.8,
+      "left"
+    ],
+    [
+      14,
+      11.0,
+      376.5,
+      "left"
+    ],
+    [
+      15,
+      11.0,
+      418.5,
+      "left"
+    ],
+    [
+      16,
+      11.5,
+      485.5,
+      "left"
+    ],
+    [
+      17,
+      513.0,
+      55.0,
+      "right"
+    ],
+    [
+      18,
+      513.0,
+      90.0,
+      "right"
+    ],
+    [
+      19,
+      513.0,
+      105.0,
+      "right"
+    ],
+    [
+      20,
+      512.5,
+      127.5,
+      "right"
+    ],
+    [
+      21,
+      512.0,
+      149.0,
+      "right"
+    ],
+    [
+      22,
+      508.5,
+      170.0,
+      "right"
+    ],
+    [
+      23,
+      512.5,
+      209.5,
+      "right"
+    ],
+    [
+      24,
+      512.5,
+      227.0,
+      "right"
+    ],
+    [
+      25,
+      512.5,
+      254.0,
+      "right"
+    ],
+    [
+      15,
+      508.5,
+      277.0,
+      "right"
+    ],
+    [
+      26,
+      513.0,
+      315.5,
+      "right"
+    ],
+    [
+      27,
+      512.5,
+      344.5,
+      "right"
+    ],
+    [
+      28,
+      508.5,
+      381.0,
+      "right"
+    ],
+    [
+      16,
+      509.5,
+      472.5,
+      "right"
+    ]
+  ],
+  "cardio-08": [
+    [
+      1,
+      12.5,
+      84.5,
+      "left"
+    ],
+    [
+      2,
+      17.0,
+      102.5,
+      "left"
+    ],
+    [
+      3,
+      13.0,
+      151.0,
+      "left"
+    ],
+    [
+      4,
+      12.5,
+      167.5,
+      "left"
+    ],
+    [
+      5,
+      12.5,
+      201.0,
+      "left"
+    ],
+    [
+      6,
+      12.5,
+      219.5,
+      "left"
+    ],
+    [
+      7,
+      13.0,
+      241.0,
+      "left"
+    ],
+    [
+      8,
+      12.5,
+      254.5,
+      "left"
+    ],
+    [
+      9,
+      12.5,
+      298.0,
+      "left"
+    ],
+    [
+      10,
+      14.5,
+      313.5,
+      "left"
+    ],
+    [
+      11,
+      10.5,
+      330.0,
+      "left"
+    ],
+    [
+      12,
+      11.0,
+      362.0,
+      "left"
+    ],
+    [
+      13,
+      11.0,
+      371.5,
+      "left"
+    ],
+    [
+      14,
+      11.0,
+      408.5,
+      "left"
+    ],
+    [
+      15,
+      11.0,
+      467.0,
+      "left"
+    ],
+    [
+      16,
+      11.5,
+      478.5,
+      "left"
+    ],
+    [
+      17,
+      11.0,
+      493.5,
+      "left"
+    ],
+    [
+      18,
+      11.0,
+      519.5,
+      "left"
+    ],
+    [
+      19,
+      511.5,
+      91.0,
+      "right"
+    ],
+    [
+      20,
+      511.5,
+      109.5,
+      "right"
+    ],
+    [
+      21,
+      511.0,
+      129.0,
+      "right"
+    ],
+    [
+      22,
+      511.5,
+      149.5,
+      "right"
+    ],
+    [
+      23,
+      511.5,
+      169.5,
+      "right"
+    ],
+    [
+      24,
+      511.5,
+      182.5,
+      "right"
+    ],
+    [
+      27,
+      511.0,
+      209.0,
+      "right"
+    ],
+    [
+      28,
+      507.5,
+      266.5,
+      "right"
+    ],
+    [
+      29,
+      507.5,
+      295.0,
+      "right"
+    ],
+    [
+      30,
+      511.5,
+      321.5,
+      "right"
+    ],
+    [
+      31,
+      511.0,
+      364.0,
+      "right"
+    ],
+    [
+      20,
+      511.5,
+      378.5,
+      "right"
+    ],
+    [
+      32,
+      511.5,
+      408.0,
+      "right"
+    ],
+    [
+      33,
+      511.5,
+      468.5,
+      "right"
+    ],
+    [
+      34,
+      511.0,
+      495.0,
+      "right"
+    ],
+    [
+      29,
+      507.5,
+      535.0,
+      "right"
+    ]
+  ],
+  "cardio-09": [
+    [
+      1,
+      11.5,
+      39.5,
+      "left"
+    ],
+    [
+      2,
+      11.5,
+      64.0,
+      "left"
+    ],
+    [
+      3,
+      11.0,
+      93.5,
+      "left"
+    ],
+    [
+      4,
+      11.0,
+      111.5,
+      "left"
+    ],
+    [
+      5,
+      15.5,
+      137.0,
+      "left"
+    ],
+    [
+      6,
+      11.5,
+      152.0,
+      "left"
+    ],
+    [
+      7,
+      11.5,
+      171.5,
+      "left"
+    ],
+    [
+      8,
+      11.0,
+      212.5,
+      "left"
+    ],
+    [
+      10,
+      13.5,
+      235.0,
+      "left"
+    ],
+    [
+      11,
+      9.0,
+      263.5,
+      "left"
+    ],
+    [
+      12,
+      14.0,
+      289.2,
+      "left"
+    ],
+    [
+      4,
+      14.0,
+      291.8,
+      "left"
+    ],
+    [
+      13,
+      10.0,
+      360.0,
+      "left"
+    ],
+    [
+      14,
+      9.0,
+      370.0,
+      "left"
+    ],
+    [
+      15,
+      9.5,
+      423.5,
+      "left"
+    ],
+    [
+      16,
+      13.0,
+      479.5,
+      "left"
+    ],
+    [
+      17,
+      9.5,
+      505.0,
+      "left"
+    ],
+    [
+      18,
+      10.0,
+      564.5,
+      "left"
+    ],
+    [
+      19,
+      510.0,
+      65.0,
+      "right"
+    ],
+    [
+      20,
+      509.5,
+      95.0,
+      "right"
+    ],
+    [
+      21,
+      505.0,
+      116.5,
+      "right"
+    ],
+    [
+      22,
+      509.5,
+      135.0,
+      "right"
+    ],
+    [
+      23,
+      509.5,
+      183.5,
+      "right"
+    ],
+    [
+      24,
+      509.5,
+      198.5,
+      "right"
+    ],
+    [
+      25,
+      509.5,
+      224.0,
+      "right"
+    ],
+    [
+      26,
+      506.0,
+      244.0,
+      "right"
+    ],
+    [
+      27,
+      505.5,
+      266.0,
+      "right"
+    ],
+    [
+      28,
+      509.5,
+      296.0,
+      "right"
+    ],
+    [
+      29,
+      510.0,
+      341.0,
+      "right"
+    ],
+    [
+      30,
+      510.0,
+      377.0,
+      "right"
+    ],
+    [
+      31,
+      509.0,
+      402.5,
+      "right"
+    ],
+    [
+      32,
+      510.0,
+      430.0,
+      "right"
+    ],
+    [
+      7,
+      510.0,
+      512.5,
+      "right"
+    ],
+    [
+      18,
+      505.5,
+      545.5,
+      "right"
+    ]
+  ],
+  "cardio-10": [
+    [
+      1,
+      20.0,
+      120.5,
+      "left"
+    ],
+    [
+      2,
+      18.5,
+      134.0,
+      "left"
+    ],
+    [
+      3,
+      19.0,
+      163.0,
+      "left"
+    ],
+    [
+      4,
+      13.0,
+      203.0,
+      "left"
+    ],
+    [
+      5,
+      13.0,
+      217.0,
+      "left"
+    ],
+    [
+      6,
+      13.5,
+      238.0,
+      "left"
+    ],
+    [
+      7,
+      13.5,
+      290.0,
+      "left"
+    ],
+    [
+      4,
+      19.0,
+      419.0,
+      "left"
+    ],
+    [
+      10,
+      17.0,
+      506.0,
+      "left"
+    ],
+    [
+      11,
+      507.0,
+      173.0,
+      "right"
+    ],
+    [
+      12,
+      507.0,
+      193.0,
+      "right"
+    ],
+    [
+      13,
+      507.5,
+      252.0,
+      "right"
+    ],
+    [
+      14,
+      500.5,
+      266.0,
+      "right"
+    ],
+    [
+      15,
+      500.5,
+      350.0,
+      "right"
+    ],
+    [
+      11,
+      500.5,
+      394.0,
+      "right"
+    ],
+    [
+      16,
+      500.5,
+      398.0,
+      "right"
+    ],
+    [
+      17,
+      507.5,
+      433.0,
+      "right"
+    ],
+    [
+      18,
+      500.5,
+      488.0,
+      "right"
+    ],
+    [
+      19,
+      500.5,
+      526.0,
+      "right"
+    ]
+  ],
+  "cardio-11": [
+    [
+      1,
+      10.5,
+      55.0,
+      "left"
+    ],
+    [
+      2,
+      11.0,
+      91.0,
+      "left"
+    ],
+    [
+      3,
+      11.0,
+      175.0,
+      "left"
+    ],
+    [
+      4,
+      10.5,
+      239.0,
+      "left"
+    ],
+    [
+      5,
+      11.0,
+      381.5,
+      "left"
+    ],
+    [
+      6,
+      10.5,
+      400.0,
+      "left"
+    ],
+    [
+      7,
+      14.5,
+      432.0,
+      "left"
+    ],
+    [
+      8,
+      11.0,
+      469.0,
+      "left"
+    ],
+    [
+      9,
+      10.5,
+      516.0,
+      "left"
+    ],
+    [
+      10,
+      8.5,
+      601.0,
+      "left"
+    ],
+    [
+      11,
+      507.5,
+      132.0,
+      "right"
+    ],
+    [
+      12,
+      508.0,
+      201.0,
+      "right"
+    ],
+    [
+      13,
+      508.5,
+      247.0,
+      "right"
+    ],
+    [
+      14,
+      502.0,
+      305.0,
+      "right"
+    ],
+    [
+      15,
+      508.0,
+      371.0,
+      "right"
+    ],
+    [
+      16,
+      508.0,
+      402.0,
+      "right"
+    ],
+    [
+      17,
+      503.0,
+      449.0,
+      "right"
+    ],
+    [
+      18,
+      502.0,
+      515.0,
+      "right"
+    ],
+    [
+      19,
+      502.0,
+      531.0,
+      "right"
+    ],
+    [
+      20,
+      508.5,
+      557.0,
+      "right"
+    ],
+    [
+      21,
+      502.5,
+      581.0,
+      "right"
+    ],
+    [
+      22,
+      502.5,
+      625.0,
+      "right"
+    ]
+  ],
+  "renal-01": [
+    [
+      1,
+      9.0,
+      170.5,
+      "left"
+    ],
+    [
+      2,
+      9.0,
+      276.5,
+      "left"
+    ],
+    [
+      3,
+      9.5,
+      305.5,
+      "left"
+    ],
+    [
+      5,
+      14.5,
+      507.0,
+      "left"
+    ],
+    [
+      7,
+      15.0,
+      537.5,
+      "left"
+    ],
+    [
+      8,
+      14.5,
+      590.5,
+      "left"
+    ],
+    [
+      9,
+      9.0,
+      617.5,
+      "left"
+    ],
+    [
+      1,
+      510.5,
+      173.5,
+      "right"
+    ],
+    [
+      4,
+      510.0,
+      227.5,
+      "right"
+    ],
+    [
+      6,
+      510.0,
+      542.5,
+      "right"
+    ]
+  ],
+  "renal-02": [
+    [
+      15,
+      507.0,
+      432.0,
+      "right"
+    ],
+    [
+      16,
+      508.0,
+      495.0,
+      "right"
+    ],
+    [
+      17,
+      507.5,
+      553.0,
+      "right"
+    ],
+    [
+      18,
+      507.0,
+      686.0,
+      "right"
+    ]
+  ],
+  "renal-03": [
+    [
+      19,
+      14.9,
+      144.2,
+      "left"
+    ],
+    [
+      20,
+      15.4,
+      192.4,
+      "left"
+    ],
+    [
+      21,
+      16.9,
+      225.7,
+      "left"
+    ],
+    [
+      17,
+      15.9,
+      258.0,
+      "left"
+    ],
+    [
+      22,
+      15.4,
+      291.8,
+      "left"
+    ],
+    [
+      23,
+      15.9,
+      370.8,
+      "left"
+    ],
+    [
+      24,
+      17.4,
+      491.6,
+      "left"
+    ],
+    [
+      25,
+      505.1,
+      162.5,
+      "right"
+    ],
+    [
+      26,
+      505.6,
+      188.9,
+      "right"
+    ],
+    [
+      27,
+      505.1,
+      212.8,
+      "right"
+    ],
+    [
+      28,
+      500.1,
+      266.9,
+      "right"
+    ],
+    [
+      29,
+      495.6,
+      329.0,
+      "right"
+    ],
+    [
+      30,
+      498.1,
+      385.2,
+      "right"
+    ],
+    [
+      31,
+      501.1,
+      456.8,
+      "right"
+    ],
+    [
+      32,
+      505.6,
+      488.6,
+      "right"
+    ],
+    [
+      33,
+      505.6,
+      538.4,
+      "right"
+    ]
+  ],
+  "renal-04": [
+    [
+      34,
+      14.0,
+      208.7,
+      "left"
+    ],
+    [
+      35,
+      13.6,
+      258.5,
+      "left"
+    ],
+    [
+      28,
+      14.0,
+      289.0,
+      "left"
+    ],
+    [
+      37,
+      510.6,
+      179.2,
+      "right"
+    ],
+    [
+      38,
+      511.3,
+      224.9,
+      "right"
+    ],
+    [
+      17,
+      508.7,
+      284.1,
+      "right"
+    ]
+  ],
+  "renal-05": [
+    [
+      1,
+      14.5,
+      216.5,
+      "left"
+    ],
+    [
+      2,
+      21.5,
+      231.0,
+      "left"
+    ],
+    [
+      3,
+      14.0,
+      322.5,
+      "left"
+    ],
+    [
+      4,
+      14.0,
+      364.5,
+      "left"
+    ],
+    [
+      5,
+      21.5,
+      383.0,
+      "left"
+    ],
+    [
+      6,
+      21.0,
+      423.0,
+      "left"
+    ],
+    [
+      7,
+      505.5,
+      101.5,
+      "right"
+    ],
+    [
+      8,
+      497.5,
+      128.0,
+      "right"
+    ],
+    [
+      9,
+      504.0,
+      150.5,
+      "right"
+    ],
+    [
+      10,
+      501.0,
+      196.5,
+      "right"
+    ],
+    [
+      11,
+      500.0,
+      215.0,
+      "right"
+    ],
+    [
+      12,
+      501.0,
+      345.5,
+      "right"
+    ],
+    [
+      13,
+      501.0,
+      402.0,
+      "right"
+    ],
+    [
+      14,
+      507.5,
+      457.0,
+      "right"
+    ],
+    [
+      15,
+      508.5,
+      514.5,
+      "right"
+    ]
+  ],
+  "renal-06": [
+    [
+      2,
+      13.5,
+      114.5,
+      "left"
+    ],
+    [
+      3,
+      14.0,
+      164.0,
+      "left"
+    ],
+    [
+      4,
+      13.5,
+      193.0,
+      "left"
+    ],
+    [
+      5,
+      19.0,
+      208.0,
+      "left"
+    ],
+    [
+      6,
+      14.0,
+      223.0,
+      "left"
+    ],
+    [
+      7,
+      19.0,
+      271.0,
+      "left"
+    ],
+    [
+      8,
+      13.5,
+      299.0,
+      "left"
+    ],
+    [
+      9,
+      19.0,
+      330.0,
+      "left"
+    ],
+    [
+      10,
+      12.0,
+      351.5,
+      "left"
+    ],
+    [
+      3,
+      14.0,
+      377.5,
+      "left"
+    ],
+    [
+      4,
+      11.0,
+      398.0,
+      "left"
+    ],
+    [
+      12,
+      511.5,
+      66.5,
+      "right"
+    ],
+    [
+      13,
+      506.0,
+      94.0,
+      "right"
+    ],
+    [
+      14,
+      511.5,
+      143.0,
+      "right"
+    ],
+    [
+      15,
+      512.0,
+      173.5,
+      "right"
+    ],
+    [
+      16,
+      506.5,
+      192.5,
+      "right"
+    ],
+    [
+      5,
+      508.5,
+      224.0,
+      "right"
+    ],
+    [
+      17,
+      506.5,
+      252.0,
+      "right"
+    ],
+    [
+      8,
+      505.5,
+      275.5,
+      "right"
+    ],
+    [
+      18,
+      511.5,
+      292.0,
+      "right"
+    ],
+    [
+      19,
+      507.0,
+      357.5,
+      "right"
+    ],
+    [
+      20,
+      511.5,
+      386.5,
+      "right"
+    ],
+    [
+      21,
+      510.5,
+      397.0,
+      "right"
+    ]
+  ],
+  "renal-07": [
+    [
+      20,
+      13.6,
+      77.1,
+      "left"
+    ],
+    [
+      21,
+      13.2,
+      134.9,
+      "left"
+    ],
+    [
+      22,
+      13.6,
+      155.7,
+      "left"
+    ],
+    [
+      17,
+      17.8,
+      175.7,
+      "left"
+    ],
+    [
+      16,
+      14.0,
+      197.6,
+      "left"
+    ],
+    [
+      23,
+      13.6,
+      227.9,
+      "left"
+    ],
+    [
+      24,
+      508.3,
+      92.2,
+      "right"
+    ],
+    [
+      16,
+      506.8,
+      171.9,
+      "right"
+    ],
+    [
+      25,
+      508.3,
+      342.0,
+      "right"
+    ]
+  ],
+  "renal-08": [
+    [
+      1,
+      21.0,
+      85.5,
+      "left"
+    ],
+    [
+      2,
+      28.5,
+      123.0,
+      "left"
+    ],
+    [
+      3,
+      28.5,
+      185.0,
+      "left"
+    ],
+    [
+      4,
+      21.0,
+      230.5,
+      "left"
+    ],
+    [
+      5,
+      29.0,
+      263.0,
+      "left"
+    ],
+    [
+      6,
+      21.0,
+      332.5,
+      "left"
+    ],
+    [
+      7,
+      29.0,
+      358.0,
+      "left"
+    ],
+    [
+      8,
+      21.5,
+      386.5,
+      "left"
+    ],
+    [
+      9,
+      21.0,
+      408.0,
+      "left"
+    ],
+    [
+      10,
+      25.5,
+      482.5,
+      "left"
+    ],
+    [
+      4,
+      25.5,
+      487.5,
+      "left"
+    ],
+    [
+      11,
+      16.5,
+      528.5,
+      "left"
+    ],
+    [
+      12,
+      17.6,
+      577.7,
+      "left"
+    ],
+    [
+      13,
+      507.8,
+      156.6,
+      "right"
+    ],
+    [
+      14,
+      508.0,
+      298.5,
+      "right"
+    ],
+    [
+      15,
+      508.0,
+      346.0,
+      "right"
+    ],
+    [
+      16,
+      509.0,
+      407.0,
+      "right"
+    ],
+    [
+      17,
+      508.0,
+      427.5,
+      "right"
+    ],
+    [
+      18,
+      508.0,
+      519.0,
+      "right"
+    ],
+    [
+      19,
+      507.5,
+      537.0,
+      "right"
+    ],
+    [
+      20,
+      508.7,
+      561.9,
+      "right"
+    ],
+    [
+      21,
+      506.5,
+      593.5,
+      "right"
+    ]
+  ],
+  "renal-09": [
+    [
+      1,
+      17.0,
+      99.0,
+      "left"
+    ],
+    [
+      2,
+      11.5,
+      152.0,
+      "left"
+    ],
+    [
+      3,
+      11.5,
+      187.0,
+      "left"
+    ],
+    [
+      4,
+      11.5,
+      237.0,
+      "left"
+    ],
+    [
+      5,
+      16.5,
+      320.5,
+      "left"
+    ],
+    [
+      6,
+      16.5,
+      356.0,
+      "left"
+    ],
+    [
+      7,
+      17.0,
+      405.0,
+      "left"
+    ],
+    [
+      8,
+      16.5,
+      529.0,
+      "left"
+    ],
+    [
+      9,
+      501.5,
+      117.0,
+      "right"
+    ],
+    [
+      11,
+      508.0,
+      164.0,
+      "right"
+    ],
+    [
+      12,
+      503.5,
+      180.5,
+      "right"
+    ],
+    [
+      13,
+      506.0,
+      202.5,
+      "right"
+    ],
+    [
+      14,
+      505.5,
+      238.0,
+      "right"
+    ],
+    [
+      13,
+      508.5,
+      258.5,
+      "right"
+    ],
+    [
+      14,
+      503.5,
+      285.0,
+      "right"
+    ],
+    [
+      15,
+      503.5,
+      352.5,
+      "right"
+    ],
+    [
+      6,
+      506.0,
+      397.0,
+      "right"
+    ],
+    [
+      7,
+      508.5,
+      472.5,
+      "right"
+    ],
+    [
+      18,
+      506.0,
+      514.0,
+      "right"
+    ]
+  ],
+  "pulm-01": [
+    [
+      1,
+      12.0,
+      143.5,
+      "left"
+    ],
+    [
+      2,
+      12.5,
+      172.5,
+      "left"
+    ],
+    [
+      3,
+      18.0,
+      200.5,
+      "left"
+    ],
+    [
+      4,
+      12.0,
+      236.5,
+      "left"
+    ],
+    [
+      5,
+      18.0,
+      276.5,
+      "left"
+    ],
+    [
+      6,
+      16.0,
+      303.5,
+      "left"
+    ],
+    [
+      7,
+      16.0,
+      337.0,
+      "left"
+    ],
+    [
+      8,
+      18.0,
+      367.5,
+      "left"
+    ],
+    [
+      9,
+      12.5,
+      406.5,
+      "left"
+    ],
+    [
+      10,
+      11.0,
+      436.5,
+      "left"
+    ],
+    [
+      11,
+      504.5,
+      139.5,
+      "right"
+    ],
+    [
+      12,
+      501.0,
+      176.0,
+      "right"
+    ],
+    [
+      13,
+      505.5,
+      189.5,
+      "right"
+    ],
+    [
+      14,
+      505.0,
+      212.5,
+      "right"
+    ],
+    [
+      15,
+      500.5,
+      271.0,
+      "right"
+    ],
+    [
+      16,
+      506.0,
+      314.5,
+      "right"
+    ],
+    [
+      17,
+      501.0,
+      361.0,
+      "right"
+    ],
+    [
+      18,
+      506.0,
+      379.5,
+      "right"
+    ],
+    [
+      19,
+      506.0,
+      431.0,
+      "right"
+    ],
+    [
+      20,
+      501.0,
+      474.5,
+      "right"
+    ]
+  ],
+  "pulm-02": [
+    [
+      1,
+      8.5,
+      57.5,
+      "left"
+    ],
+    [
+      2,
+      8.5,
+      103.0,
+      "left"
+    ],
+    [
+      3,
+      8.5,
+      114.5,
+      "left"
+    ],
+    [
+      4,
+      8.0,
+      148.5,
+      "left"
+    ],
+    [
+      5,
+      8.0,
+      161.0,
+      "left"
+    ],
+    [
+      6,
+      11.0,
+      173.5,
+      "left"
+    ],
+    [
+      7,
+      9.0,
+      205.5,
+      "left"
+    ],
+    [
+      8,
+      12.0,
+      226.0,
+      "left"
+    ],
+    [
+      9,
+      8.0,
+      249.5,
+      "left"
+    ],
+    [
+      10,
+      6.5,
+      267.0,
+      "left"
+    ],
+    [
+      11,
+      6.5,
+      282.5,
+      "left"
+    ],
+    [
+      12,
+      7.0,
+      299.0,
+      "left"
+    ],
+    [
+      13,
+      6.5,
+      327.0,
+      "left"
+    ],
+    [
+      14,
+      6.0,
+      346.0,
+      "left"
+    ],
+    [
+      15,
+      9.5,
+      372.5,
+      "left"
+    ],
+    [
+      16,
+      10.5,
+      398.0,
+      "left"
+    ],
+    [
+      17,
+      510.0,
+      69.0,
+      "right"
+    ],
+    [
+      18,
+      510.0,
+      95.0,
+      "right"
+    ],
+    [
+      19,
+      510.0,
+      127.5,
+      "right"
+    ],
+    [
+      20,
+      510.5,
+      161.5,
+      "right"
+    ],
+    [
+      21,
+      510.0,
+      205.0,
+      "right"
+    ],
+    [
+      22,
+      510.5,
+      228.5,
+      "right"
+    ],
+    [
+      23,
+      509.5,
+      247.0,
+      "right"
+    ],
+    [
+      24,
+      510.0,
+      280.0,
+      "right"
+    ],
+    [
+      25,
+      510.0,
+      335.0,
+      "right"
+    ],
+    [
+      26,
+      510.0,
+      357.0,
+      "right"
+    ]
+  ],
+  "pulm-03": [
+    [
+      17,
+      13.5,
+      213.5,
+      "left"
+    ],
+    [
+      18,
+      14.0,
+      240.5,
+      "left"
+    ],
+    [
+      19,
+      14.0,
+      261.5,
+      "left"
+    ],
+    [
+      20,
+      13.5,
+      286.5,
+      "left"
+    ],
+    [
+      21,
+      12.5,
+      312.5,
+      "left"
+    ],
+    [
+      2,
+      505.0,
+      124.5,
+      "right"
+    ],
+    [
+      3,
+      505.5,
+      160.5,
+      "right"
+    ],
+    [
+      4,
+      504.5,
+      204.5,
+      "right"
+    ],
+    [
+      5,
+      500.5,
+      222.5,
+      "right"
+    ],
+    [
+      6,
+      505.0,
+      236.5,
+      "right"
+    ],
+    [
+      7,
+      502.0,
+      249.5,
+      "right"
+    ],
+    [
+      8,
+      505.0,
+      262.5,
+      "right"
+    ],
+    [
+      9,
+      504.5,
+      315.5,
+      "right"
+    ],
+    [
+      16,
+      508.0,
+      355.5,
+      "right"
+    ],
+    [
+      10,
+      508.0,
+      395.5,
+      "right"
+    ],
+    [
+      11,
+      507.5,
+      432.5,
+      "right"
+    ],
+    [
+      12,
+      508.0,
+      482.5,
+      "right"
+    ],
+    [
+      13,
+      502.5,
+      519.0,
+      "right"
+    ]
+  ],
+  "pulm-04": [
+    [
+      1,
+      19.0,
+      180.5,
+      "left"
+    ],
+    [
+      2,
+      24.5,
+      257.5,
+      "left"
+    ],
+    [
+      24,
+      18.5,
+      382.5,
+      "left"
+    ],
+    [
+      22,
+      19.0,
+      431.0,
+      "left"
+    ],
+    [
+      6,
+      24.5,
+      479.5,
+      "left"
+    ],
+    [
+      3,
+      497.5,
+      278.5,
+      "right"
+    ],
+    [
+      10,
+      503.0,
+      327.5,
+      "right"
+    ],
+    [
+      25,
+      498.0,
+      376.0,
+      "right"
+    ],
+    [
+      26,
+      504.0,
+      421.5,
+      "right"
+    ],
+    [
+      12,
+      502.5,
+      462.5,
+      "right"
+    ],
+    [
+      7,
+      498.0,
+      503.5,
+      "right"
+    ],
+    [
+      8,
+      498.0,
+      545.0,
+      "right"
+    ],
+    [
+      16,
+      504.0,
+      660.5,
+      "right"
+    ],
+    [
+      9,
+      497.5,
+      709.5,
+      "right"
+    ]
+  ],
+  "pulm-05": [
+    [
+      2,
+      18.0,
+      222.5,
+      "left"
+    ],
+    [
+      3,
+      18.0,
+      273.5,
+      "left"
+    ],
+    [
+      4,
+      21.5,
+      321.0,
+      "left"
+    ],
+    [
+      5,
+      18.0,
+      362.5,
+      "left"
+    ],
+    [
+      6,
+      22.0,
+      404.5,
+      "left"
+    ],
+    [
+      18,
+      12.5,
+      520.5,
+      "left"
+    ],
+    [
+      7,
+      18.0,
+      570.5,
+      "left"
+    ],
+    [
+      8,
+      18.0,
+      619.5,
+      "left"
+    ],
+    [
+      1,
+      492.0,
+      324.5,
+      "right"
+    ],
+    [
+      2,
+      495.0,
+      389.0,
+      "right"
+    ],
+    [
+      12,
+      499.0,
+      498.0,
+      "right"
+    ],
+    [
+      1,
+      499.5,
+      534.5,
+      "right"
+    ],
+    [
+      20,
+      501.0,
+      570.5,
+      "right"
+    ],
+    [
+      13,
+      499.5,
+      604.5,
+      "right"
+    ],
+    [
+      14,
+      499.0,
+      641.0,
+      "right"
+    ],
+    [
+      16,
+      500.0,
+      676.5,
+      "right"
+    ],
+    [
+      17,
+      499.5,
+      718.5,
+      "right"
+    ]
+  ],
+  "pulm-06": [
+    [
+      12,
+      8.5,
+      45.5,
+      "left"
+    ],
+    [
+      13,
+      8.5,
+      74.5,
+      "left"
+    ],
+    [
+      2,
+      12.5,
+      94.5,
+      "left"
+    ],
+    [
+      14,
+      8.5,
+      107.5,
+      "left"
+    ],
+    [
+      15,
+      9.0,
+      127.5,
+      "left"
+    ],
+    [
+      16,
+      9.0,
+      150.5,
+      "left"
+    ],
+    [
+      3,
+      10.5,
+      160.5,
+      "left"
+    ],
+    [
+      4,
+      10.5,
+      175.5,
+      "left"
+    ],
+    [
+      5,
+      10.5,
+      184.5,
+      "left"
+    ],
+    [
+      17,
+      9.0,
+      200.5,
+      "left"
+    ],
+    [
+      18,
+      11.0,
+      221.5,
+      "left"
+    ]
+  ],
+  "pulm-07": [
+    [
+      1,
+      11.5,
+      57.5,
+      "left"
+    ],
+    [
+      2,
+      11.5,
+      81.0,
+      "left"
+    ],
+    [
+      3,
+      11.0,
+      100.0,
+      "left"
+    ],
+    [
+      4,
+      11.0,
+      123.5,
+      "left"
+    ],
+    [
+      5,
+      11.0,
+      132.0,
+      "left"
+    ],
+    [
+      6,
+      15.0,
+      141.0,
+      "left"
+    ],
+    [
+      7,
+      11.5,
+      150.5,
+      "left"
+    ],
+    [
+      8,
+      11.5,
+      164.0,
+      "left"
+    ],
+    [
+      9,
+      15.0,
+      180.0,
+      "left"
+    ],
+    [
+      10,
+      9.5,
+      232.5,
+      "left"
+    ],
+    [
+      12,
+      13.0,
+      285.0,
+      "left"
+    ],
+    [
+      13,
+      10.0,
+      323.0,
+      "left"
+    ],
+    [
+      14,
+      13.5,
+      372.5,
+      "left"
+    ],
+    [
+      15,
+      13.0,
+      399.0,
+      "left"
+    ],
+    [
+      16,
+      10.0,
+      424.0,
+      "left"
+    ],
+    [
+      17,
+      9.0,
+      485.5,
+      "left"
+    ],
+    [
+      18,
+      13.0,
+      541.5,
+      "left"
+    ],
+    [
+      19,
+      509.0,
+      6.5,
+      "right"
+    ],
+    [
+      20,
+      509.0,
+      45.0,
+      "right"
+    ],
+    [
+      21,
+      508.0,
+      76.5,
+      "right"
+    ],
+    [
+      22,
+      505.5,
+      132.0,
+      "right"
+    ],
+    [
+      23,
+      504.5,
+      161.5,
+      "right"
+    ],
+    [
+      24,
+      508.5,
+      177.0,
+      "right"
+    ],
+    [
+      25,
+      505.0,
+      191.0,
+      "right"
+    ],
+    [
+      26,
+      509.0,
+      232.0,
+      "right"
+    ],
+    [
+      27,
+      504.5,
+      278.0,
+      "right"
+    ],
+    [
+      28,
+      508.5,
+      376.0,
+      "right"
+    ],
+    [
+      2,
+      508.5,
+      438.5,
+      "right"
+    ],
+    [
+      31,
+      504.0,
+      510.0,
+      "right"
+    ]
+  ],
+  "pulm-08": [
+    [
+      1,
+      9.5,
+      21.5,
+      "left"
+    ],
+    [
+      2,
+      13.0,
+      46.0,
+      "left"
+    ],
+    [
+      3,
+      9.5,
+      79.5,
+      "left"
+    ],
+    [
+      4,
+      9.5,
+      121.5,
+      "left"
+    ],
+    [
+      5,
+      13.5,
+      132.5,
+      "left"
+    ],
+    [
+      6,
+      9.5,
+      143.0,
+      "left"
+    ],
+    [
+      7,
+      13.5,
+      153.0,
+      "left"
+    ],
+    [
+      8,
+      9.5,
+      223.5,
+      "left"
+    ],
+    [
+      9,
+      12.0,
+      257.0,
+      "left"
+    ],
+    [
+      10,
+      8.0,
+      302.5,
+      "left"
+    ],
+    [
+      11,
+      7.5,
+      370.5,
+      "left"
+    ],
+    [
+      12,
+      11.5,
+      396.5,
+      "left"
+    ],
+    [
+      13,
+      7.5,
+      455.0,
+      "left"
+    ],
+    [
+      14,
+      11.5,
+      528.2,
+      "left"
+    ],
+    [
+      4,
+      11.5,
+      530.8,
+      "left"
+    ],
+    [
+      15,
+      8.0,
+      548.0,
+      "left"
+    ],
+    [
+      16,
+      513.5,
+      42.0,
+      "right"
+    ],
+    [
+      17,
+      513.0,
+      50.5,
+      "right"
+    ],
+    [
+      18,
+      510.0,
+      85.0,
+      "right"
+    ],
+    [
+      19,
+      508.5,
+      99.5,
+      "right"
+    ],
+    [
+      20,
+      509.5,
+      123.5,
+      "right"
+    ],
+    [
+      21,
+      508.5,
+      154.5,
+      "right"
+    ],
+    [
+      22,
+      509.5,
+      193.0,
+      "right"
+    ],
+    [
+      23,
+      512.5,
+      254.5,
+      "right"
+    ],
+    [
+      24,
+      512.5,
+      328.5,
+      "right"
+    ],
+    [
+      25,
+      512.5,
+      406.0,
+      "right"
+    ],
+    [
+      26,
+      513.0,
+      445.5,
+      "right"
+    ],
+    [
+      27,
+      512.5,
+      484.0,
+      "right"
+    ],
+    [
+      15,
+      513.0,
+      522.0,
+      "right"
+    ],
+    [
+      28,
+      512.5,
+      569.0,
+      "right"
+    ]
+  ]
+};
+
+      const systemFilters = document.getElementById("systemFilters");
+      const tabs = document.getElementById("figureTabs");
+      const image = document.getElementById("figureImage");
+      const hotspotLayer = document.getElementById("hotspotLayer");
+      const figureTitle = document.getElementById("figureTitle");
+      const figureCount = document.getElementById("figureCount");
+      const figureNote = document.getElementById("figureNote");
+      const bank = document.getElementById("labelBank");
+      const scoreValue = document.getElementById("scoreValue");
+      const scoreLabel = document.getElementById("scoreLabel");
+      const progressBar = document.getElementById("progressBar");
+      const status = document.getElementById("status");
+      const findButton = document.getElementById("findButton");
+      const shuffleButton = document.getElementById("shuffleButton");
+      const retryReviewButton = document.getElementById("retryReviewButton");
+      const resetButton = document.getElementById("resetButton");
+
+      let activeSystem = "all";
+      let activeFigure = figures[0];
+      let roundAnswers = activeFigure.answers;
+      let solved = new Set();
+      let retryPool = new Set();
+      let perfectFigures = new Set();
+      let selectedNumber = null;
+      let retryingMissed = false;
+      let hintTimer = null;
+      let pointerDrag = null;
+      const quizDragType = "application/x-anatomy-structure-number";
+
+      const systemDefs = [
+        { id: "all", label: "All Unit 2" },
+        { id: "cardio", label: "Cardiovascular", dot: "dot-cardio" },
+        { id: "renal", label: "Renal / Urinary", dot: "dot-renal" },
+        { id: "pulm", label: "Respiratory", dot: "dot-pulm" }
+      ];
+
+      function shuffled(items) {
+        const copy = [...items];
+        for (let i = copy.length - 1; i > 0; i -= 1) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [copy[i], copy[j]] = [copy[j], copy[i]];
+        }
+        return copy;
+      }
+
+      function answerMap() {
+        return new Map(activeFigure.answers.map(([number, name]) => [String(number), name]));
+      }
+
+      function hotspotsForAnswer(number) {
+        return [...hotspotLayer.querySelectorAll(`[data-number="${CSS.escape(String(number))}"]`)];
+      }
+
+      function setStatus(message, tone = "") {
+        status.className = `status ${tone}`.trim();
+        status.textContent = message;
+      }
+
+      function updateScore() {
+        const count = solved.size;
+        const total = roundAnswers.length;
+        scoreValue.textContent = `${count} / ${total}`;
+        scoreLabel.textContent = retryingMissed ? `${activeFigure.tab} retry` : activeFigure.tab;
+        progressBar.style.width = total ? `${(count / total) * 100}%` : "0%";
+      }
+
+      function updateRetryButton() {
+        const count = retryPool.size;
+        retryReviewButton.textContent = `Retry missed + Find (${count})`;
+        retryReviewButton.disabled = count === 0;
+      }
+
+      function addToRetryPool(...numbers) {
+        const valid = answerMap();
+        numbers.forEach(n => {
+          const s = String(n);
+          if (valid.has(s)) retryPool.add(s);
+        });
+        updateRetryButton();
+      }
+
+      function clearSelection() {
+        selectedNumber = null;
+        bank.querySelectorAll(".label-chip").forEach(chip => {
+          chip.classList.remove("selected");
+          chip.setAttribute("aria-pressed", "false");
+        });
+        updateFindButton();
+      }
+
+      function updateFindButton() {
+        const selectedName = selectedNumber ? answerMap().get(selectedNumber) : "";
+        findButton.disabled = !selectedName;
+        findButton.title = selectedName
+          ? `Press F or click to flash the numbered marker for ${selectedName}`
+          : "Select a structure name first, then press F";
+      }
+
+      function clearHint() {
+        if (hintTimer) window.clearTimeout(hintTimer);
+        hintTimer = null;
+        hotspotLayer.querySelectorAll(".hotspot.hint").forEach(el => el.classList.remove("hint"));
+      }
+
+      function dragTargetAtPoint(x, y) {
+        const el = document.elementFromPoint(x, y);
+        return el instanceof Element ? el.closest(".hotspot") : null;
+      }
+
+      function clearDragOver() {
+        document.querySelectorAll(".hotspot.drag-over").forEach(el => el.classList.remove("drag-over"));
+      }
+
+      function movePointerDrag(event) {
+        if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        pointerDrag.ghost.style.left = `${event.clientX}px`;
+        pointerDrag.ghost.style.top = `${event.clientY}px`;
+        clearDragOver();
+        dragTargetAtPoint(event.clientX, event.clientY)?.classList.add("drag-over");
+      }
+
+      function finishPointerDrag(event, cancelled = false) {
+        if (!pointerDrag || pointerDrag.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        const cur = pointerDrag;
+        const dropTarget = cancelled ? null : dragTargetAtPoint(event.clientX, event.clientY);
+        pointerDrag = null;
+        clearDragOver();
+        cur.chip.classList.remove("dragging");
+        cur.ghost.remove();
+        if (dropTarget?.dataset.number) {
+          solve(cur.number, String(dropTarget.dataset.number), dropTarget);
+        }
+      }
+
+      function startPointerDrag(event, chip, handle, number, name) {
+        if (event.button !== undefined && event.button !== 0) return;
+        if (chip.classList.contains("solved")) return;
+        event.preventDefault();
+        const ghost = document.createElement("div");
+        ghost.className = "drag-ghost";
+        ghost.textContent = name;
+        document.body.appendChild(ghost);
+        ghost.style.left = `${event.clientX}px`;
+        ghost.style.top = `${event.clientY}px`;
+        chip.classList.add("dragging");
+        pointerDrag = { pointerId: event.pointerId, chip, ghost, number: String(number) };
+        handle.setPointerCapture?.(event.pointerId);
+      }
+
+      function markWrong(el) {
+        el.classList.remove("wrong");
+        void el.offsetWidth;
+        el.classList.add("wrong");
+        window.setTimeout(() => el.classList.remove("wrong"), 260);
+      }
+
+      function flashSelectedTarget() {
+        if (!selectedNumber) return;
+        clearHint();
+        const hs = hotspotsForAnswer(selectedNumber);
+        if (!hs.length) return;
+        addToRetryPool(selectedNumber);
+        hs.forEach(el => el.classList.add("hint"));
+        setStatus(`Find: watch for the highlighted marker(s) for ${answerMap().get(selectedNumber)}.`, "");
+        hintTimer = window.setTimeout(clearHint, 1500);
+      }
+
+      function selectChip(number) {
+        if (solved.has(number)) return;
+        clearHint();
+        selectedNumber = number;
+        bank.querySelectorAll(".label-chip").forEach(chip => {
+          const isSelected = chip.dataset.number === number;
+          chip.classList.toggle("selected", isSelected);
+          chip.setAttribute("aria-pressed", String(isSelected));
+        });
+        updateFindButton();
+        setStatus(`Selected: ${answerMap().get(number)}. Now click its numbered circle on the figure.`);
+      }
+
+      function solve(labelNumber, targetNumber, targetElement) {
+        const answers = answerMap();
+        if (!answers.has(labelNumber)) {
+          markWrong(targetElement);
+          setStatus("That name isn't part of this figure.", "wrong");
+          return;
+        }
+        if (String(labelNumber) !== String(targetNumber)) {
+          markWrong(targetElement);
+          addToRetryPool(labelNumber, targetNumber);
+          setStatus(`Not quite: ${answers.get(labelNumber)} is not ${targetNumber}.`, "wrong");
+          return;
+        }
+        solved.add(labelNumber);
+        updateRetryButton();
+
+        const name = answers.get(labelNumber);
+        hotspotsForAnswer(labelNumber).forEach(h => {
+          h.classList.add("solved");
+          h.setAttribute("aria-disabled", "true");
+        });
+        const chip = bank.querySelector(`.label-chip[data-number="${CSS.escape(labelNumber)}"]`);
+        if (chip) {
+          chip.classList.remove("selected");
+          chip.classList.add("solved");
+          chip.setAttribute("aria-disabled", "true");
+          chip.setAttribute("aria-pressed", "false");
+        }
+        clearSelection();
+        updateScore();
+        if (solved.size === roundAnswers.length) {
+          if (retryPool.size) {
+            setStatus(`Round complete — retry the ${retryPool.size} ${retryPool.size === 1 ? "structure" : "structures"} missed or revealed with Find.`, "wrong");
+          } else {
+            setStatus(`Perfect — all ${roundAnswers.length} ${retryingMissed ? "retry" : "visible"} targets matched without a miss or Find hint.`, "correct");
+            if (!retryingMissed) {
+              perfectFigures.add(activeFigure.id);
+              renderTabs();
+              renderSystemFilters();
+            }
+          }
+        } else {
+          setStatus(`Correct: ${targetNumber} is ${name}.`, "correct");
+        }
+      }
+
+      function makeChip([number, name]) {
+        const chip = document.createElement("div");
+        chip.className = "label-chip";
+        chip.dataset.number = String(number);
+        chip.tabIndex = 0;
+        chip.draggable = true;
+        chip.setAttribute("role", "button");
+        chip.setAttribute("aria-pressed", "false");
+
+        const dragHandle = document.createElement("span");
+        dragHandle.className = "drag-handle";
+        dragHandle.setAttribute("aria-hidden", "true");
+
+        const labelText = document.createElement("span");
+        labelText.className = "label-text";
+        labelText.textContent = name;
+        chip.append(dragHandle, labelText);
+
+        chip.addEventListener("click", () => selectChip(String(number)));
+        chip.addEventListener("keydown", e => {
+          if (!["Enter", " "].includes(e.key) || solved.has(String(number))) return;
+          e.preventDefault();
+          selectChip(String(number));
+        });
+        chip.addEventListener("dragstart", e => {
+          if (solved.has(String(number))) { e.preventDefault(); return; }
+          e.dataTransfer.setData(quizDragType, String(number));
+          e.dataTransfer.setData("text/plain", name);
+          e.dataTransfer.effectAllowed = "move";
+        });
+        dragHandle.addEventListener("pointerdown", e => startPointerDrag(e, chip, dragHandle, number, name));
+        return chip;
+      }
+
+      function layoutHotspots() {
+        const layerHeight = hotspotLayer.clientHeight;
+        const layerWidth = hotspotLayer.clientWidth;
+        if (!layerHeight || !layerWidth) return;
+
+        const rendered = [...hotspotLayer.querySelectorAll(".hotspot")];
+        if (!rendered.length) return;
+
+        const markerSize = Math.max(...rendered.map(m => m.getBoundingClientRect().width));
+        const laneGap = markerSize + 2;
+        const laneStep = markerSize + 3;
+        const edgeInset = (markerSize / 2) + 2;
+
+        ["left", "right"].forEach(side => {
+          const markers = rendered
+            .filter(m => m.dataset.side === side)
+            .map(m => ({
+              marker: m,
+              desiredX: (Number(m.dataset.sourceX) / activeFigure.width) * layerWidth,
+              desiredY: (Number(m.dataset.sourceY) / activeFigure.height) * layerHeight
+            }))
+            .sort((a, b) => a.desiredY - b.desiredY);
+
+          const laneLastY = [];
+          markers.forEach(({ marker, desiredX, desiredY }) => {
+            let lane = laneLastY.findIndex(lastY => desiredY - lastY >= laneGap);
+            if (lane === -1) lane = laneLastY.length;
+            laneLastY[lane] = desiredY;
+
+            const dir = side === "left" ? 1 : -1;
+            const placedX = Math.min(layerWidth - edgeInset, Math.max(edgeInset, desiredX + dir * lane * laneStep));
+            marker.style.left = `${placedX}px`;
+            marker.style.top = `${desiredY}px`;
+          });
+        });
+      }
+
+      function makeHotspotElements([number, sourceX, sourceY, sideHint]) {
+        const side = sideHint || (sourceX < activeFigure.width / 2 ? "left" : "right");
+        const left = `${(sourceX / activeFigure.width) * 100}%`;
+        const top = `${(sourceY / activeFigure.height) * 100}%`;
+
+        const mask = document.createElement("span");
+        mask.className = `source-number-mask ${side}`;
+        mask.style.left = left;
+        mask.style.top = top;
+        mask.setAttribute("aria-hidden", "true");
+
+        const target = document.createElement("button");
+        target.type = "button";
+        target.className = "hotspot";
+        target.dataset.number = String(number);
+        target.dataset.side = side;
+        target.dataset.sourceX = String(sourceX);
+        target.dataset.sourceY = String(sourceY);
+        target.style.left = left;
+        target.style.top = top;
+        target.textContent = number;
+        target.setAttribute("aria-label", `Target ${number}`);
+        target.addEventListener("click", () => {
+          const s = String(number);
+          if (solved.has(s)) {
+            setStatus(`${s}: ${answerMap().get(s)}`, "correct");
+            return;
+          }
+          if (!selectedNumber) {
+            setStatus("Choose a structure name first, then click a numbered circle.");
+            return;
+          }
+          solve(selectedNumber, s, target);
+        });
+        target.addEventListener("dragover", e => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "move";
+          target.classList.add("drag-over");
+        });
+        target.addEventListener("dragleave", () => target.classList.remove("drag-over"));
+        target.addEventListener("drop", e => {
+          e.preventDefault();
+          target.classList.remove("drag-over");
+          const num = e.dataTransfer.getData(quizDragType).trim();
+          if (num) solve(num, String(number), target);
+        });
+        return [mask, target];
+      }
+
+      function renderRound({
+        answers = activeFigure.answers,
+        retryMode = false,
+        statusMessage = "Choose a structure to begin."
+      } = {}) {
+        clearHint();
+        roundAnswers = answers;
+        retryingMissed = retryMode;
+        retryPool = new Set();
+        image.src = activeFigure.image;
+        image.width = activeFigure.width;
+        image.height = activeFigure.height;
+        image.alt = `${activeFigure.title}; numbered anatomy figure`;
+        figureTitle.textContent = activeFigure.title;
+        figureCount.textContent = retryingMissed
+          ? `${roundAnswers.length} review ${roundAnswers.length === 1 ? "target" : "targets"}`
+          : `${activeFigure.answers.length} targets`;
+        figureNote.textContent = activeFigure.note;
+        bank.replaceChildren(...shuffled(roundAnswers).map(makeChip));
+        hotspotLayer.replaceChildren(...(targetPoints[activeFigure.id] || []).flatMap(makeHotspotElements));
+        window.requestAnimationFrame(layoutHotspots);
+        solved = new Set();
+        selectedNumber = null;
+        updateFindButton();
+        updateRetryButton();
+        updateScore();
+        setStatus(statusMessage);
+      }
+
+      function visibleFigures() {
+        return activeSystem === "all" ? figures : figures.filter(f => f.system === activeSystem);
+      }
+
+      function renderSystemFilters() {
+        systemFilters.replaceChildren(...systemDefs.map(def => {
+          const list = def.id === "all" ? figures : figures.filter(f => f.system === def.id);
+          const doneCount = list.filter(f => perfectFigures.has(f.id)).length;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `system-pill${activeSystem === def.id ? " active" : ""}`;
+          if (def.dot) {
+            const dot = document.createElement("span");
+            dot.className = `system-dot ${def.dot}`;
+            btn.appendChild(dot);
+          }
+          const txt = document.createElement("span");
+          txt.textContent = doneCount ? `${def.label} (${doneCount}/${list.length} ✓)` : `${def.label} (${list.length})`;
+          btn.appendChild(txt);
+          btn.addEventListener("click", () => {
+            activeSystem = def.id;
+            const filtered = visibleFigures();
+            if (!filtered.some(f => f.id === activeFigure.id) && filtered.length) {
+              activeFigure = filtered[0];
+              renderRound();
+            }
+            renderSystemFilters();
+            renderTabs();
+          });
+          return btn;
+        }));
+      }
+
+      function renderTabs() {
+        const list = visibleFigures();
+        tabs.replaceChildren(...list.map(figure => {
+          const tab = document.createElement("button");
+          tab.type = "button";
+          tab.className = "figure-tab";
+          if (figure.id === activeFigure.id) tab.classList.add("active");
+          if (perfectFigures.has(figure.id)) tab.classList.add("perfect");
+          tab.textContent = figure.tab;
+          tab.dataset.figure = figure.id;
+          tab.addEventListener("click", () => {
+            activeFigure = figure;
+            renderTabs();
+            renderRound();
+          });
+          return tab;
+        }));
+      }
+
+      shuffleButton.addEventListener("click", () => {
+        const unsolved = [...bank.querySelectorAll(".label-chip:not(.solved)")];
+        bank.replaceChildren(...[...bank.querySelectorAll(".label-chip.solved"), ...shuffled(unsolved)]);
+        clearSelection();
+        setStatus("Structure names shuffled.");
+      });
+
+      findButton.addEventListener("click", flashSelectedTarget);
+      retryReviewButton.addEventListener("click", () => {
+        if (!retryPool.size) return;
+        const retryNums = new Set(retryPool);
+        const retryAnswers = activeFigure.answers.filter(([n]) => retryNums.has(String(n)));
+        renderRound({
+          answers: retryAnswers,
+          retryMode: true,
+          statusMessage: `Retrying ${retryAnswers.length} ${retryAnswers.length === 1 ? "structure" : "structures"} missed or revealed with Find.`
+        });
+      });
+      resetButton.addEventListener("click", () => {
+        perfectFigures.delete(activeFigure.id);
+        renderTabs();
+        renderSystemFilters();
+        renderRound();
+      });
+
+      document.addEventListener("pointermove", movePointerDrag, { passive: false });
+      document.addEventListener("pointerup", e => finishPointerDrag(e));
+      document.addEventListener("pointercancel", e => finishPointerDrag(e, true));
+      document.addEventListener("keydown", e => {
+        if (e.key.toLowerCase() !== "f" || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || e.repeat) return;
+        if (e.target instanceof HTMLElement && (e.target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(e.target.tagName))) return;
+        if (findButton.disabled) {
+          setStatus("Select a structure name first, then press F to find it.");
+          return;
+        }
+        e.preventDefault();
+        flashSelectedTarget();
+      });
+
+      image.addEventListener("load", layoutHotspots);
+      new ResizeObserver(layoutHotspots).observe(hotspotLayer);
+
+      renderSystemFilters();
+      renderTabs();
+      renderRound();
+    })();
+  </script>
+</body>
+</html>

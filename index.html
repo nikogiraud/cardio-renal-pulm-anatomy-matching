@@ -161,6 +161,13 @@
 
     .control:disabled:hover { border-color: var(--border); }
 
+    .control.toggle-on {
+      border-color: var(--hint);
+      background: light-dark(#fef9c3, #3b3214);
+      color: light-dark(#713f12, #fde047);
+      font-weight: 700;
+    }
+
     .figure-tab.active {
       border-color: var(--primary);
       background: var(--primary-soft);
@@ -605,6 +612,7 @@
     <div class="toolbar">
       <div id="status" class="status" role="status" aria-live="polite">Choose a structure to begin.</div>
       <div class="toolbar-actions">
+        <button id="highlightToggleButton" class="control toggle-on" type="button" aria-pressed="true">Highlighted only ✓</button>
         <button id="shuffleButton" class="control" type="button">Shuffle names</button>
         <button id="retryReviewButton" class="control" type="button" disabled>Retry missed + Find (0)</button>
         <button id="resetButton" class="control" type="button">Reset round</button>
@@ -6183,6 +6191,35 @@
   ]
 };
 
+      const highlightedTargets = {"cardio-08": [13, 14, 15, 17, 33, 34], "cardio-09": [28, 29], "cardio-10": [1, 2, 4, 5, 8, 10, 11, 12, 13, 14, 15, 17, 18, 19], "cardio-11": [11, 13], "renal-01": [1, 2, 3, 4, 9], "renal-02": [17, 18], "renal-03": [17, 21, 22, 25, 26, 28, 30, 33], "renal-04": [17, 28, 34, 37, 38], "renal-05": [1, 2, 3, 4, 5, 9, 10, 12, 15], "renal-06": [3, 7, 8, 9, 17, 19, 21], "renal-07": [16, 20, 23, 24, 25], "renal-08": [3, 9, 11, 14, 15, 16, 17, 18, 19, 20, 21], "renal-09": [2, 3, 4, 6, 7, 8, 14, 15, 17], "pulm-01": [16, 18], "pulm-02": [12, 19], "pulm-03": [4, 5, 6, 9, 10, 12, 13, 21], "pulm-04": [3, 6], "pulm-05": [7, 8, 13, 14, 20], "pulm-06": [2, 3, 5, 6, 8, 10, 11, 14, 15, 16, 18, 19, 20, 21, 23, 24, 25, 26], "pulm-07": [2, 4, 5, 6, 7, 8, 12, 13, 14, 15, 19, 22, 23, 24, 26, 27, 28, 29], "pulm-08": [5, 9, 10, 11, 12, 13, 24, 26, 27], "cardio-coronary-ant": [1, 2, 3, 4, 5, 6], "cardio-coronary-post": [1, 2, 3, 4, 5], "cardio-veins": [1, 2, 3, 4]};
+      const highlightToggleButton = document.getElementById("highlightToggleButton");
+      let highlightOnly = true;
+
+      function activeFigureAnswers(fig = activeFigure) {
+        const hl = highlightedTargets[fig.id];
+        if (highlightOnly && hl && hl.length) {
+          const s = new Set(hl.map(String));
+          return fig.answers.filter(([n]) => s.has(String(n)));
+        }
+        return fig.answers;
+      }
+
+      function activeFigurePoints(fig = activeFigure) {
+        const pts = targetPoints[fig.id] || [];
+        const hl = highlightedTargets[fig.id];
+        if (highlightOnly && hl && hl.length) {
+          const s = new Set(hl.map(String));
+          return pts.filter(([n]) => s.has(String(n)));
+        }
+        return pts;
+      }
+
+      function updateHighlightToggleUI() {
+        highlightToggleButton.classList.toggle("toggle-on", highlightOnly);
+        highlightToggleButton.setAttribute("aria-pressed", String(highlightOnly));
+        highlightToggleButton.textContent = highlightOnly ? "Highlighted only ✓" : "Showing all labels";
+      }
+
       const systemFilters = document.getElementById("systemFilters");
       const tabs = document.getElementById("figureTabs");
       const image = document.getElementById("figureImage");
@@ -6283,6 +6320,7 @@
           if (!raw) return;
           const data = JSON.parse(raw);
           if (data && typeof data === "object") {
+            if (typeof data.highlightOnly === "boolean") highlightOnly = data.highlightOnly;
             if (typeof data.activeSystem === "string" && ["all", "cardio", "renal", "pulm"].includes(data.activeSystem)) {
               activeSystem = data.activeSystem;
             }
@@ -6312,6 +6350,7 @@
           };
           window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
             activeSystem,
+            highlightOnly,
             activeFigureId: activeFigure.id,
             perfectFigures: [...perfectFigures],
             figureProgress
@@ -6339,7 +6378,7 @@
       }
 
       function answerMap() {
-        return new Map(activeFigure.answers.map(([number, name]) => [String(number), name]));
+        return new Map(activeFigureAnswers().map(([number, name]) => [String(number), name]));
       }
 
       function hotspotsForAnswer(number) {
@@ -6668,10 +6707,10 @@
         const validMap = answerMap();
         if (saved && saved.retryingMissed && Array.isArray(saved.retryTargets) && saved.retryTargets.length) {
           const targetSet = new Set(saved.retryTargets.map(String));
-          roundAnswers = activeFigure.answers.filter(([n]) => targetSet.has(String(n)));
+          roundAnswers = activeFigureAnswers().filter(([n]) => targetSet.has(String(n)));
           retryingMissed = true;
         } else {
-          roundAnswers = answers || activeFigure.answers;
+          roundAnswers = answers || activeFigureAnswers();
           retryingMissed = retryMode;
         }
         const roundSet = new Set(roundAnswers.map(([n]) => String(n)));
@@ -6684,15 +6723,18 @@
         image.height = activeFigure.height;
         image.alt = `${activeFigure.title}; numbered anatomy figure`;
         figureTitle.textContent = activeFigure.title;
+        const hasHl = Boolean(highlightedTargets[activeFigure.id]?.length);
         figureCount.textContent = retryingMissed
           ? `${roundAnswers.length} review ${roundAnswers.length === 1 ? "target" : "targets"}`
-          : `${activeFigure.answers.length} targets`;
+          : (highlightOnly && hasHl
+              ? `${roundAnswers.length} highlighted (of ${activeFigure.answers.length})`
+              : `${activeFigure.answers.length} targets`);
         figureNote.textContent = activeFigure.note;
 
         const unsolvedRound = roundAnswers.filter(([n]) => !solved.has(String(n)));
         const solvedRound = roundAnswers.filter(([n]) => solved.has(String(n)));
         bank.replaceChildren(...[...solvedRound, ...shuffled(unsolvedRound)].map(makeChip));
-        hotspotLayer.replaceChildren(...(targetPoints[activeFigure.id] || []).flatMap(makeHotspotElements));
+        hotspotLayer.replaceChildren(...activeFigurePoints().flatMap(makeHotspotElements));
 
         solved.forEach(num => {
           hotspotsForAnswer(num).forEach(h => {
@@ -6785,7 +6827,7 @@
       retryReviewButton.addEventListener("click", () => {
         if (!retryPool.size) return;
         const retryNums = new Set(retryPool);
-        const retryAnswers = activeFigure.answers.filter(([n]) => retryNums.has(String(n)));
+        const retryAnswers = activeFigureAnswers().filter(([n]) => retryNums.has(String(n)));
         renderRound({
           answers: retryAnswers,
           retryMode: true,
@@ -6817,7 +6859,15 @@
       image.addEventListener("load", layoutHotspots);
       new ResizeObserver(layoutHotspots).observe(hotspotLayer);
 
+      highlightToggleButton.addEventListener("click", () => {
+        highlightOnly = !highlightOnly;
+        updateHighlightToggleUI();
+        saveState();
+        renderRound({ restore: true });
+      });
+
       loadState();
+      updateHighlightToggleUI();
       renderSystemFilters();
       renderTabs();
       renderRound({ restore: true });

@@ -7010,7 +7010,20 @@
         const unsolvedRound = roundAnswers.filter(([n]) => !solved.has(String(n)));
         const solvedRound = roundAnswers.filter(([n]) => solved.has(String(n)));
         bank.replaceChildren(...[...solvedRound, ...shuffled(unsolvedRound)].map(makeChip));
-        hotspotLayer.replaceChildren(...activeFigurePoints().flatMap(makeHotspotElements));
+        const activePts = activeFigurePoints();
+        const activeNums = new Set(activePts.map(([n]) => String(n)));
+        const hiddenMasks = (targetPoints[activeFigure.id] || [])
+          .filter(([n]) => !activeNums.has(String(n)))
+          .map(([, sourceX, sourceY, sideHint]) => {
+            const side = sideHint || (sourceX < activeFigure.width / 2 ? "left" : "right");
+            const mask = document.createElement("span");
+            mask.className = `source-number-mask ${side}`;
+            mask.style.left = `${(sourceX / activeFigure.width) * 100}%`;
+            mask.style.top = `${(sourceY / activeFigure.height) * 100}%`;
+            mask.setAttribute("aria-hidden", "true");
+            return mask;
+          });
+        hotspotLayer.replaceChildren(...hiddenMasks, ...activePts.flatMap(makeHotspotElements));
 
         solved.forEach(num => {
           hotspotsForAnswer(num).forEach(h => {

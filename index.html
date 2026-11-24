@@ -6275,13 +6275,13 @@
         target.setAttribute("aria-label", `Target ${number}`);
         target.addEventListener("click", () => {
           const s = String(number);
-          if (solved.has(s)) {
-            const solvedName = answerMap().get(s);
-            setStatus(`${s}: ${solvedName}`, "correct");
-            showFactCard(solvedName);
-            return;
-          }
           if (!selectedNumber) {
+            if (solved.has(s)) {
+              const solvedName = answerMap().get(s);
+              setStatus(`${s}: ${solvedName}`, "correct");
+              showFactCard(solvedName);
+              return;
+            }
             setStatus("Choose a structure name first, then click a numbered circle.");
             return;
           }

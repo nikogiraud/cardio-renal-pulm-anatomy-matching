@@ -1,0 +1,821 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dr. Ousley CRP Clinical Correlations Trainer</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --page: light-dark(#eef3f8, #0d1219);
+      --surface: light-dark(#ffffff, #161d27);
+      --surface-2: light-dark(#f6f8fb, #202936);
+      --text: light-dark(#17202c, #eef4fb);
+      --muted: light-dark(#5d6a79, #aab7c7);
+      --border: light-dark(#d4dce6, #354253);
+      --primary: light-dark(#235fb5, #78adf6);
+      --primary-soft: light-dark(#e7f0ff, #18365d);
+      --correct: light-dark(#167447, #65d39c);
+      --correct-soft: light-dark(#e3f5eb, #173f31);
+      --wrong: light-dark(#b52f3a, #ff8992);
+      --wrong-soft: light-dark(#fdebed, #4c2229);
+      --cardio: light-dark(#be123c, #fb7185);
+      --renal: light-dark(#0f766e, #2dd4bf);
+      --pulm: light-dark(#1d4ed8, #60a5fa);
+      --shadow: 0 18px 50px light-dark(rgba(31, 47, 68, 0.12), rgba(0, 0, 0, 0.28));
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--page);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, a { font: inherit; }
+
+    .app {
+      width: min(1140px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 56px;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+      color: var(--primary);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .nav-back:hover { text-decoration: underline; }
+
+    .topbar {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.4rem, 2.3vw, 2rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.94rem;
+    }
+
+    .score {
+      flex: 0 0 auto;
+      min-width: 132px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .score strong {
+      display: block;
+      font-size: 1.35rem;
+      line-height: 1.1;
+    }
+
+    .score span {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .controls-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pill, .control {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 36px;
+      padding: 6px 13px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .control { border-radius: 10px; background: var(--surface-2); font-weight: 500; }
+    .pill:hover, .control:hover { border-color: var(--primary); }
+    .control:disabled { opacity: 0.48; cursor: not-allowed; }
+    .control:disabled:hover { border-color: var(--border); }
+
+    .pill.active {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .pill.active .dot { background: #ffffff !important; }
+    .dot-cardio { background: var(--cardio); }
+    .dot-renal { background: var(--renal); }
+    .dot-pulm { background: var(--pulm); }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.35;
+    }
+
+    .status.correct { color: var(--correct); font-weight: 600; }
+    .status.wrong { color: var(--wrong); font-weight: 600; }
+
+    .toolbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .match-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .col-title {
+      margin: 0 0 10px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .match-card {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-align: left;
+      font-size: 0.92rem;
+      line-height: 1.38;
+      cursor: pointer;
+      transition: transform 110ms ease, border-color 110ms ease, background 110ms ease;
+    }
+
+    .match-card:hover:not(:disabled) {
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    .match-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+
+    .match-card.solved {
+      border-color: var(--correct);
+      background: var(--correct-soft);
+      color: var(--correct);
+      opacity: 0.72;
+      cursor: default;
+    }
+
+    .match-card.wrong {
+      border-color: var(--wrong);
+      background: var(--wrong-soft);
+      color: var(--wrong);
+      animation: shake 240ms linear;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 4px;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .tag-cardio { background: light-dark(#ffe4e6, #4c1d24); color: var(--cardio); }
+    .tag-renal { background: light-dark(#ccfbf1, #134e4a); color: var(--renal); }
+    .tag-pulm { background: light-dark(#dbeafe, #1e3a5f); color: var(--pulm); }
+
+    .pearl-box {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-2);
+      font-size: 0.88rem;
+      line-height: 1.42;
+    }
+
+    .pearl-box.highlight {
+      border-color: var(--correct);
+      background: light-dark(#f1fbf5, #142a22);
+    }
+
+    /* Flashcard Mode */
+    .flashcard-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .flashcard {
+      min-height: 230px;
+      padding: 26px 24px;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface-2);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+      cursor: pointer;
+    }
+
+    .fc-prompt {
+      font-size: 1.18rem;
+      font-weight: 700;
+      line-height: 1.38;
+    }
+
+    .fc-answer {
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      color: var(--correct);
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .fc-pearl {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.42;
+    }
+
+    .fc-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .btn-good {
+      border-color: var(--correct);
+      background: var(--correct-soft);
+      color: var(--correct);
+      font-weight: 700;
+    }
+
+    .btn-miss {
+      border-color: var(--wrong);
+      background: var(--wrong-soft);
+      color: var(--wrong);
+      font-weight: 700;
+    }
+
+    .progress-track {
+      height: 7px;
+      margin-top: 16px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--surface-2);
+    }
+
+    .progress-bar {
+      width: 0;
+      height: 100%;
+      background: var(--correct);
+      transition: width 180ms ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    @media (max-width: 760px) {
+      .match-grid { grid-template-columns: 1fr; }
+      .topbar { flex-direction: column; align-items: flex-start; }
+      .toolbar { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <a class="nav-back" href="index.html">← Back to Anatomy Figure Matching</a>
+    <header class="topbar">
+      <div>
+        <h1>Dr. Ousley CRP Clinical Correlations Trainer</h1>
+        <p class="subtitle">Match each clinical vignette or surgical landmark to its exact anatomical cause (Cardiovascular, Renal, &amp; Pulmonary). Progress and missed items save automatically across refreshes.</p>
+      </div>
+      <div class="score" aria-live="polite">
+        <strong id="scoreValue">0 / 0</strong>
+        <span id="scoreLabel">mastered</span>
+      </div>
+    </header>
+
+    <div class="controls-row">
+      <div id="systemFilters" class="pills" role="group" aria-label="Filter by organ system"></div>
+      <div class="pills" role="group" aria-label="Study mode">
+        <button id="modeMatchBtn" class="pill active" type="button">Match Board</button>
+        <button id="modeFlashBtn" class="pill" type="button">Flashcards</button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div id="status" class="status" role="status" aria-live="polite">Select a clinical presentation on the left, then click its anatomical cause on the right.</div>
+      <div class="toolbar-actions">
+        <button id="nextBatchBtn" class="control" type="button">Next 6 cards</button>
+        <button id="retryMissedBtn" class="control" type="button" disabled>Retry missed (0)</button>
+        <button id="resetBtn" class="control" type="button">Reset progress</button>
+      </div>
+    </div>
+
+    <section id="stage" class="panel"></section>
+    <div class="progress-track" aria-hidden="true"><div id="progressBar" class="progress-bar"></div></div>
+  </main>
+
+  <script>
+    (() => {
+      const ITEMS = [
+        // --- CARDIOVASCULAR ---
+        { id: "c1", sys: "cardio", cue: "Paradoxical thromboembolism (DVT crosses to brain → stroke)", cause: "Patent foramen ovale (fossa ovalis on RA septum)", pearl: "Allows venous clots to bypass the lungs by crossing from right atrium directly into left atrium." },
+        { id: "c2", sys: "cardio", cue: "Dysphagia (difficulty swallowing) in a patient with cardiomegaly", cause: "Dilated left atrium compressing the esophagus", pearl: "The left atrium is the most posterior chamber of the heart, lying directly anterior to the esophagus." },
+        { id: "c3", sys: "cardio", cue: "Mitral valve prolapse (leaflet everts into LA during LV systole)", cause: "Chordae tendineae rupture / laxity", pearl: "May cause chest pain, SOB, palpitations, and cardiac arrhythmias." },
+        { id: "c4", sys: "cardio", cue: "Acute severe mitral regurgitation after MI or infective endocarditis", cause: "Papillary muscle rupture", pearl: "RV has 3 papillary muscles (anterior, posterior, septal); LV has 2 (anterior, posterior)." },
+        { id: "c5", sys: "cardio", cue: "Beck's triad (hypotension, muffled heart sounds, JVD)", cause: "Cardiac tamponade (blood/fluid in pericardial sac)", pearl: "Most commonly penetrating trauma; also LV free-wall rupture post-MI or ruptured aortic aneurysm." },
+        { id: "c6", sys: "cardio", cue: "Heart block (atrial impulses fail to reach ventricles)", cause: "Damage to cardiac conducting system (SA/AV node, Bundle of His)", pearl: "AV node lies in interatrial septum near coronary sinus opening; Bundle of His runs in membranous IV septum." },
+        { id: "c7", sys: "cardio", cue: "Hoarseness, coughing, & ipsilateral vocal cord paralysis from aortic arch aneurysm", cause: "Compression of the left recurrent laryngeal nerve", pearl: "Left RLN loops under the aortic arch; right RLN loops under the right subclavian artery." },
+        { id: "c8", sys: "cardio", cue: "Tearing substernal chest pain radiating to the back (+ Marfan / HTN)", cause: "Thoracic aortic aneurysm / dissection", pearl: "Can rupture into pericardial sac causing cardiac tamponade; mainstay is BP control until surgery." },
+        { id: "c9", sys: "cardio", cue: "Cardiac ischemic pain referred to neck, jaw, left shoulder, & left arm", cause: "Sympathetic cardiopulmonary splanchnic visceral afferents (T1–T5)", pearl: "Visceral pain fibers follow sympathetics back to T1–T5 spinal cord segments." },
+        { id: "c10", sys: "cardio", cue: "Pericardial pain referred to ipsilateral supraclavicular / shoulder skin", cause: "Phrenic nerve (C3–C5) sensory innervation of fibrous/parietal pericardium", pearl: "Pain refers to C3–C5 dermatomes." },
+        { id: "c11", sys: "cardio", cue: "Surgical space used to clamp aorta & pulmonary trunk during open-heart surgery", cause: "Transverse pericardial sinus", pearl: "Posterior to ascending aorta & pulmonary trunk; admits 2 fingers." },
+        { id: "c12", sys: "cardio", cue: "Pericardiocentesis needle insertion landmark", cause: "Left 5th–6th ICS near sternum (bare area) or left infrasternal angle", pearl: "Relieves cardiac tamponade without piercing the pleura/lungs." },
+        { id: "c13", sys: "cardio", cue: "Most commonly occluded coronary artery (order: 1st > 2nd > 3rd)", cause: "LAD > RCA > LCx", pearl: "LAD (anterior interventricular branch) is the major blood supply to the left ventricle." },
+        { id: "c14", sys: "cardio", cue: "Standard vessels harvested as coronary bypass (CABG) conduits", cause: "Great saphenous vein or internal thoracic (mammary) artery", pearl: "Shunts blood from aorta distal to the coronary artery obstruction." },
+        { id: "c15", sys: "cardio", cue: "Drug to CLOSE vs. KEEP OPEN a patent ductus arteriosus (PDA)", cause: "Indomethacin closes PDA; Prostaglandin E1 keeps PDA open", pearl: "Ductus arteriosus normally shunts pulmonary artery blood into the aorta in utero." },
+
+        // --- RENAL / URINARY ---
+        { id: "r1", sys: "renal", cue: "Flank/abdominal pain, hematuria, and left varicocele (Nutcracker syndrome)", cause: "Left renal vein compressed between SMA and abdominal aorta", pearl: "Left testicular/ovarian vein drains into the left renal vein at a 90° angle." },
+        { id: "r2", sys: "renal", cue: "Tender swollen left testicle following venous thrombosis", cause: "Left renal vein thrombosis (left testicular v. drains into left renal v.)", pearl: "Right testicular, right suprarenal, and right inferior phrenic veins drain directly into the IVC." },
+        { id: "r3", sys: "renal", cue: "Direction blood tracks after kidney trauma without piercing Gerota's fascia", cause: "Inferiorly toward the pelvis", pearl: "Gerota's (renal) fascia is closed superiorly/laterally/medially but open inferiorly along the ureter." },
+        { id: "r4", sys: "renal", cue: "Congenital fusion of inferior kidney poles stuck low in abdomen", cause: "Horseshoe kidney trapped from ascending by the inferior mesenteric artery (IMA)", pearl: "Both kidneys typically continue to function normally." },
+        { id: "r5", sys: "renal", cue: "Bilateral massively enlarged cystic kidneys + HTN + subarachnoid hemorrhage risk", cause: "Autosomal dominant polycystic kidney disease (ADPKD) + berry aneurysms", pearl: "Also associated with polycystic liver disease." },
+        { id: "r6", sys: "renal", cue: "Pediatric kidney mass (ages 2–4) + aniridia + GU anomalies + intellectual disability", cause: "Wilms tumor (nephroblastoma) — WAGR syndrome", pearl: "Most common site of metastasis is the lungs." },
+        { id: "r7", sys: "renal", cue: "3 anatomical narrowings where calcium oxalate kidney stones lodge", cause: "Ureteropelvic junction (UPJ), pelvic brim, & bladder entry (UVJ)", pearl: "Renal colic visceral pain travels via sympathetic splanchnic nerves (T11–L1/L2); causes hydronephrosis." },
+        { id: "r8", sys: "renal", cue: "Structure accidentally ligated during hysterectomy / uterine cancer surgery", cause: "Ureter ('water under the bridge' — passes deep to uterine artery)", pearl: "Ureter crosses anterior to internal iliac artery and posterior/inferior to the uterine artery near cervix." },
+        { id: "r9", sys: "renal", cue: "Urinary bladder herniating into anterior vaginal wall after childbirth", cause: "Cystocele (torn pubovesicular & vesicocervical fasciae)", pearl: "Posterior wall of bladder lies directly against the anterior vaginal wall." },
+        { id: "r10", sys: "renal", cue: "Difficulty initiating urination in a 65 y/o man with enlarged rubbery prostate (BPH)", cause: "Compression of the prostatic urethra", pearl: "External urethral sphincter lies distal to the prostate in the membranous urethra." },
+        { id: "r11", sys: "renal", cue: "Stress urinary incontinence (urine leakage when coughing)", cause: "Pudendal nerve (S2–S4) damage → weak external urethral sphincter", pearl: "Pudendal nerve provides voluntary somatic motor control of the external urethral sphincter." },
+        { id: "r12", sys: "renal", cue: "Pelvic fracture + 'high-riding prostate' on DRE", cause: "Membranous urethral injury — DO NOT place Foley before retrograde urethrogram", pearl: "Membranous urethra rupture leaks urine/blood into the retropubic space of Retzius." },
+        { id: "r13", sys: "renal", cue: "Urine extravasation into scrotum & superficial perineal space (blocked from thigh)", cause: "Penile (spongy) urethra rupture inferior to perineal membrane", pearl: "Scarpa's fascia attaches to tensor fascia lata, preventing spread into the thigh." },
+        { id: "r14", sys: "renal", cue: "Why women get UTIs (cystitis/pyelonephritis) much more often than men", cause: "Much shorter female urethra (usually E. coli)", pearl: "Cystitis symptoms: dysuria, frequency, urgency, suprapubic tenderness." },
+
+        // --- PULMONARY / RESPIRATORY ---
+        { id: "p1", sys: "pulm", cue: "Clear watery nasal drip (CSF rhinorrhea) & anosmia after head trauma", cause: "Basilar skull fracture through cribriform plate of ethmoid (CN I)", pearl: "Roof of nasal cavity is formed by sphenoid & cribriform plate." },
+        { id: "p2", sys: "pulm", cue: "Swallowed fishbone / foreign body lodged beside the larynx", cause: "Piriform recess (in laryngopharynx / hypopharynx)", pearl: "Internal laryngeal nerve runs right beneath the mucosa of the piriform recess." },
+        { id: "p3", sys: "pulm", cue: "Inability to ABduct vocal cords during quiet breathing", cause: "Posterior cricoarytenoid muscle paralysis (RLN / inferior laryngeal n.)", pearl: "Posterior cricoarytenoid is the ONLY vocal cord abductor; all other laryngeal muscles adduct." },
+        { id: "p4", sys: "pulm", cue: "Unilateral vs. bilateral recurrent laryngeal nerve (RLN) injury", cause: "Unilateral → hoarseness; Bilateral → glottic closure, stridor, needs tracheostomy", pearl: "Cricothyroid is the ONLY laryngeal muscle spared (external branch of superior laryngeal nerve)." },
+        { id: "p5", sys: "pulm", cue: "Emergent cricothyrotomy landmark & artery at risk", cause: "Cricothyroid membrane (1 finger below thyroid notch); cricothyroid artery at risk", pearl: "Cricothyroid artery branches off superior thyroid a. ← external carotid a." },
+        { id: "p6", sys: "pulm", cue: "Apical lung tumor + arm pain/thenar atrophy + ptosis, miosis, anhidrosis", cause: "Pancoast tumor invading brachial plexus (C8–T1) & cervical sympathetic chain (Horner's)", pearl: "Sits at the thoracic inlet (cervical pleura above 1st rib)." },
+        { id: "p7", sys: "pulm", cue: "Weakened grip, drooping shoulder, & hand tingling from root-of-neck compression", cause: "Thoracic outlet syndrome (subclavian vessels / T1 nerve compression)", pearl: "Compression occurs outside the superior thoracic aperture in the root of the neck." },
+        { id: "p8", sys: "pulm", cue: "Paradoxical inward chest wall motion during inspiration after MVA", cause: "Flail chest (≥ 3 contiguous ribs fractured in ≥ 2 places)", pearl: "Destabilizes a segment of the thoracic wall." },
+        { id: "p9", sys: "pulm", cue: "Foreign body aspiration / mainstem intubation enters which bronchus & lobe?", cause: "Right main bronchus (shorter, wider, more vertical) → RLL upright / RUL posterior supine", pearl: "Carina sits at the sternal angle (T4/T5)." },
+        { id: "p10", sys: "pulm", cue: "Milky white pleural fluid (chylothorax) after open-heart/thoracic surgery", cause: "Thoracic duct injury (cisterna chyli → T12 hiatus → left venous angle)", pearl: "Runs in posterior mediastinum between thoracic aorta and azygos vein; treat with NPO or ligation." },
+        { id: "p11", sys: "pulm", cue: "Abdominal organs herniated into LEFT chest in a newborn", cause: "Congenital diaphragmatic hernia (Bochdalek = posterior/'Back'; Morgagni = anterior)", pearl: "More common on the left because the liver blocks right-sided herniation." },
+        { id: "p12", sys: "pulm", cue: "Newborn choking, coughing, & cyanosis with feeds + polyhydramnios in utero", cause: "Tracheoesophageal fistula (Type C = proximal blind pouch + distal TEF)", pearl: "Polyhydramnios occurs because fetus cannot swallow amniotic fluid." },
+        { id: "p13", sys: "pulm", cue: "Where to insert thoracentesis needle vs. needle/tube thoracostomy", cause: "Thoracentesis: 8–9th ICS MAL; Needle: 2nd ICS MCL; Chest tube: 4–5th ICS MAL", pearl: "ALWAYS go directly ABOVE the superior border of the lower rib to avoid the VAN bundle in the costal groove." },
+        { id: "p14", sys: "pulm", cue: "Why parietal pleurisy causes sharp localized pain while visceral pleura does not", cause: "Parietal pleura = somatic pain (intercostal & phrenic nerves); visceral = vagus (insensitive to pain)", pearl: "Pleural fluid layers first in the costodiaphragmatic recess when upright." },
+        { id: "p15", sys: "pulm", cue: "Why a phrenic nerve lesion in the neck may NOT completely paralyze the hemidiaphragm", cause: "Accessory phrenic nerve joining lower in the root of neck / upper thorax", pearl: "Phrenic nerve (C3–C5) runs anterior to anterior scalene and anterior to the lung root." },
+      ];
+
+      const STORAGE_KEY = "ousley-crp-clinical-correlations-v1";
+      let activeSys = "all";
+      let mode = "match"; // "match" | "flash"
+      let mastered = new Set();
+      let missed = new Set();
+      let retryingMissed = false;
+      let batchOffset = 0;
+
+      // Match board round state
+      let boardItems = [];
+      let boardSolved = new Set();
+      let selLeft = null;
+      let selRight = null;
+      let lastPearl = null;
+
+      // Flashcard state
+      let fcIndex = 0;
+      let fcFlipped = false;
+
+      const systemFilters = document.getElementById("systemFilters");
+      const modeMatchBtn = document.getElementById("modeMatchBtn");
+      const modeFlashBtn = document.getElementById("modeFlashBtn");
+      const statusEl = document.getElementById("status");
+      const scoreValue = document.getElementById("scoreValue");
+      const scoreLabel = document.getElementById("scoreLabel");
+      const progressBar = document.getElementById("progressBar");
+      const nextBatchBtn = document.getElementById("nextBatchBtn");
+      const retryMissedBtn = document.getElementById("retryMissedBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const stage = document.getElementById("stage");
+
+      const sysDefs = [
+        { id: "all", label: "All CRP" },
+        { id: "cardio", label: "Cardiovascular", dot: "dot-cardio" },
+        { id: "renal", label: "Renal / Urinary", dot: "dot-renal" },
+        { id: "pulm", label: "Pulmonary", dot: "dot-pulm" }
+      ];
+
+      function shuffled(arr) {
+        const c = [...arr];
+        for (let i = c.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [c[i], c[j]] = [c[j], c[i]];
+        }
+        return c;
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            activeSys, mode,
+            mastered: [...mastered],
+            missed: [...missed]
+          }));
+        } catch {}
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const d = JSON.parse(raw);
+          if (d.activeSys) activeSys = d.activeSys;
+          if (d.mode === "match" || d.mode === "flash") mode = d.mode;
+          if (Array.isArray(d.mastered)) mastered = new Set(d.mastered);
+          if (Array.isArray(d.missed)) missed = new Set(d.missed);
+        } catch {}
+      }
+
+      function setStatus(msg, tone = "") {
+        statusEl.className = `status ${tone}`.trim();
+        statusEl.textContent = msg;
+      }
+
+      function poolItems() {
+        let list = activeSys === "all" ? ITEMS : ITEMS.filter(x => x.sys === activeSys);
+        if (retryingMissed) list = list.filter(x => missed.has(x.id));
+        return list;
+      }
+
+      function updateHeader() {
+        const sysList = activeSys === "all" ? ITEMS : ITEMS.filter(x => x.sys === activeSys);
+        const done = sysList.filter(x => mastered.has(x.id)).length;
+        scoreValue.textContent = `${done} / ${sysList.length}`;
+        scoreLabel.textContent = retryingMissed ? "retry missed" : "mastered";
+        progressBar.style.width = sysList.length ? `${(done / sysList.length) * 100}%` : "0%";
+
+        const sysMissed = sysList.filter(x => missed.has(x.id)).length;
+        retryMissedBtn.textContent = retryingMissed ? `Exit retry (${sysMissed})` : `Retry missed (${sysMissed})`;
+        retryMissedBtn.disabled = !retryingMissed && sysMissed === 0;
+
+        modeMatchBtn.classList.toggle("active", mode === "match");
+        modeFlashBtn.classList.toggle("active", mode === "flash");
+        nextBatchBtn.hidden = mode !== "match";
+      }
+
+      function renderFilters() {
+        systemFilters.replaceChildren(...sysDefs.map(def => {
+          const list = def.id === "all" ? ITEMS : ITEMS.filter(x => x.sys === def.id);
+          const done = list.filter(x => mastered.has(x.id)).length;
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = `pill${activeSys === def.id ? " active" : ""}`;
+          if (def.dot) {
+            const dot = document.createElement("span");
+            dot.className = `dot ${def.dot}`;
+            btn.appendChild(dot);
+          }
+          const span = document.createElement("span");
+          span.textContent = done ? `${def.label} (${done}/${list.length} ✓)` : `${def.label} (${list.length})`;
+          btn.appendChild(span);
+          btn.addEventListener("click", () => {
+            activeSys = def.id;
+            retryingMissed = false;
+            batchOffset = 0;
+            fcIndex = 0;
+            saveState();
+            startView();
+          });
+          return btn;
+        }));
+      }
+
+      function loadMatchBatch() {
+        const pool = poolItems();
+        if (!pool.length) {
+          boardItems = [];
+          renderMatchBoard();
+          return;
+        }
+        // Prefer unmastered items first, then wrap around
+        const unmastered = pool.filter(x => !mastered.has(x.id));
+        const source = unmastered.length ? unmastered : pool;
+        const start = (batchOffset * 6) % source.length;
+        const picked = [];
+        for (let i = 0; i < Math.min(6, source.length); i++) {
+          picked.push(source[(start + i) % source.length]);
+        }
+        boardItems = picked;
+        boardSolved = new Set();
+        selLeft = null;
+        selRight = null;
+        lastPearl = null;
+        renderMatchBoard();
+      }
+
+      function renderMatchBoard() {
+        updateHeader();
+        renderFilters();
+        if (!boardItems.length) {
+          stage.innerHTML = `<p style="text-align:center;color:var(--muted);margin:32px 0;">No missed items left in this system — nice work!</p>`;
+          return;
+        }
+        const leftOrder = boardItems;
+        const rightOrder = stage._rightOrderFor === boardItems.map(x => x.id).join(",")
+          ? stage._rightOrder
+          : shuffled(boardItems);
+        stage._rightOrderFor = boardItems.map(x => x.id).join(",");
+        stage._rightOrder = rightOrder;
+
+        const grid = document.createElement("div");
+        grid.className = "match-grid";
+
+        const leftCol = document.createElement("div");
+        leftCol.innerHTML = `<h3 class="col-title">Clinical Presentation / Landmark</h3>`;
+        const leftList = document.createElement("div");
+        leftList.className = "card-list";
+
+        leftOrder.forEach(item => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "match-card";
+          btn.dataset.id = item.id;
+          if (boardSolved.has(item.id)) { btn.classList.add("solved"); btn.disabled = true; }
+          else if (selLeft === item.id) btn.classList.add("selected");
+          const sysName = item.sys === "cardio" ? "Cardio" : item.sys === "renal" ? "Renal" : "Pulm";
+          btn.innerHTML = `<span class="tag tag-${item.sys}">${sysName}</span><div>${item.cue}</div>`;
+          btn.addEventListener("click", () => {
+            if (boardSolved.has(item.id)) return;
+            selLeft = item.id;
+            if (selRight) checkMatch();
+            else {
+              setStatus("Now click the matching anatomical cause on the right.");
+              renderMatchBoard();
+            }
+          });
+          leftList.appendChild(btn);
+        });
+        leftCol.appendChild(leftList);
+
+        const rightCol = document.createElement("div");
+        rightCol.innerHTML = `<h3 class="col-title">Anatomical Cause / Structure</h3>`;
+        const rightList = document.createElement("div");
+        rightList.className = "card-list";
+
+        rightOrder.forEach(item => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "match-card";
+          btn.dataset.id = item.id;
+          if (boardSolved.has(item.id)) { btn.classList.add("solved"); btn.disabled = true; }
+          else if (selRight === item.id) btn.classList.add("selected");
+          btn.textContent = item.cause;
+          btn.addEventListener("click", () => {
+            if (boardSolved.has(item.id)) return;
+            selRight = item.id;
+            if (selLeft) checkMatch();
+            else {
+              setStatus("Now click the matching clinical presentation on the left.");
+              renderMatchBoard();
+            }
+          });
+          rightList.appendChild(btn);
+        });
+        rightCol.appendChild(rightList);
+
+        grid.append(leftCol, rightCol);
+
+        const pearl = document.createElement("div");
+        pearl.className = `pearl-box${lastPearl ? " highlight" : ""}`;
+        pearl.innerHTML = lastPearl
+          ? `<strong>${lastPearl.cause}</strong><br>${lastPearl.pearl}`
+          : `<span style="color:var(--muted);font-style:italic;">Match a pair to see the high-yield pearl from Dr. Ousley's slides here.</span>`;
+
+        stage.replaceChildren(grid, pearl);
+      }
+
+      function checkMatch() {
+        const lId = selLeft;
+        const rId = selRight;
+        selLeft = null;
+        selRight = null;
+        if (lId === rId) {
+          const item = boardItems.find(x => x.id === lId);
+          boardSolved.add(lId);
+          mastered.add(lId);
+          if (retryingMissed) missed.delete(lId);
+          lastPearl = item;
+          saveState();
+          if (boardSolved.size === boardItems.length) {
+            setStatus("Batch complete! Click 'Next 6 cards' for the next set.", "correct");
+          } else {
+            setStatus(`Correct: ${item.cause}`, "correct");
+          }
+          renderMatchBoard();
+        } else {
+          // Queue BOTH the selected presentation and the mismatched cause for retry!
+          missed.add(lId);
+          missed.add(rId);
+          saveState();
+          setStatus("Not quite — both mismatched correlations were added to Retry missed.", "wrong");
+          renderMatchBoard();
+          stage.querySelectorAll(`.match-card[data-id="${lId}"], .match-card[data-id="${rId}"]`).forEach(el => {
+            el.classList.add("wrong");
+            setTimeout(() => el.classList.remove("wrong"), 320);
+          });
+        }
+      }
+
+      function renderFlashcard() {
+        updateHeader();
+        renderFilters();
+        const pool = poolItems();
+        if (!pool.length) {
+          stage.innerHTML = `<p style="text-align:center;color:var(--muted);margin:32px 0;">No cards left in this filter!</p>`;
+          return;
+        }
+        fcIndex = ((fcIndex % pool.length) + pool.length) % pool.length;
+        const item = pool[fcIndex];
+        const sysName = item.sys === "cardio" ? "Cardiovascular" : item.sys === "renal" ? "Renal / Urinary" : "Pulmonary";
+
+        const wrap = document.createElement("div");
+        wrap.className = "flashcard-wrap";
+        const card = document.createElement("div");
+        card.className = "flashcard";
+        card.innerHTML = `
+          <div><span class="tag tag-${item.sys}">${sysName}</span> <span style="color:var(--muted);font-size:0.8rem;margin-left:6px;">Card ${fcIndex + 1} / ${pool.length}</span></div>
+          <div class="fc-prompt">${item.cue}</div>
+          ${fcFlipped
+            ? `<div class="fc-answer">${item.cause}</div><div class="fc-pearl">${item.pearl}</div>`
+            : `<div style="color:var(--muted);font-size:0.88rem;">Click card (or press Space) to reveal anatomical cause &amp; pearl</div>`
+          }
+        `;
+        card.addEventListener("click", () => {
+          fcFlipped = !fcFlipped;
+          renderFlashcard();
+        });
+
+        const actions = document.createElement("div");
+        actions.className = "fc-actions";
+        const missBtn = document.createElement("button");
+        missBtn.type = "button";
+        missBtn.className = "control btn-miss";
+        missBtn.textContent = "Missed — Review again";
+        missBtn.addEventListener("click", () => {
+          missed.add(item.id);
+          mastered.delete(item.id);
+          fcFlipped = false;
+          fcIndex += 1;
+          saveState();
+          setStatus("Added to Retry missed.", "wrong");
+          renderFlashcard();
+        });
+
+        const goodBtn = document.createElement("button");
+        goodBtn.type = "button";
+        goodBtn.className = "control btn-good";
+        goodBtn.textContent = "Got it ✓";
+        goodBtn.addEventListener("click", () => {
+          mastered.add(item.id);
+          missed.delete(item.id);
+          fcFlipped = false;
+          fcIndex += 1;
+          saveState();
+          setStatus("Marked mastered ✓", "correct");
+          renderFlashcard();
+        });
+
+        actions.append(missBtn, goodBtn);
+        wrap.append(card, actions);
+        stage.replaceChildren(wrap);
+      }
+
+      function startView() {
+        if (mode === "match") {
+          setStatus("Select a clinical presentation on the left, then click its anatomical cause on the right.");
+          loadMatchBatch();
+        } else {
+          fcFlipped = false;
+          setStatus("Click the card or press Space to reveal the anatomical cause.");
+          renderFlashcard();
+        }
+      }
+
+      modeMatchBtn.addEventListener("click", () => { mode = "match"; saveState(); startView(); });
+      modeFlashBtn.addEventListener("click", () => { mode = "flash"; saveState(); startView(); });
+      nextBatchBtn.addEventListener("click", () => { batchOffset += 1; loadMatchBatch(); });
+      retryMissedBtn.addEventListener("click", () => {
+        retryingMissed = !retryingMissed;
+        batchOffset = 0;
+        fcIndex = 0;
+        startView();
+      });
+      resetBtn.addEventListener("click", () => {
+        mastered.clear();
+        missed.clear();
+        retryingMissed = false;
+        batchOffset = 0;
+        fcIndex = 0;
+        saveState();
+        setStatus("Progress reset.");
+        startView();
+      });
+
+      document.addEventListener("keydown", e => {
+        if (mode !== "flash") return;
+        if (e.code === "Space") { e.preventDefault(); fcFlipped = !fcFlipped; renderFlashcard(); }
+      });
+
+      loadState();
+      startView();
+    })();
+  </script>
+</body>
+</html>

@@ -297,21 +297,21 @@
       z-index: 3;
       display: grid;
       place-items: center;
-      width: clamp(24px, 4.4%, 32px);
+      width: clamp(19px, 3.4%, 24px);
       aspect-ratio: 1;
       padding: 0;
       transform: translate(-50%, -50%);
-      border: 2px solid var(--primary);
+      border: 1.75px solid var(--primary);
       border-radius: 50%;
       background: #ffffff;
       color: var(--primary);
-      font-size: clamp(0.62rem, 1.1vw, 0.76rem);
+      font-size: clamp(0.58rem, 0.95vw, 0.7rem);
       line-height: 1;
       text-align: center;
       font-weight: 700;
       cursor: pointer;
       pointer-events: auto;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+      box-shadow: 0 1px 6px rgba(0, 0, 0, .2);
       transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
     }
 
@@ -824,6 +824,10 @@
     "height": 561,
     "note": "Thoracic organs (anterior aspect). The ribs, clavicle, and sternum have been partly removed to show the anterior mediastinum and pleura. Red = arteries blue = veins green = lymph vessels and nodes.",
     "answers": [
+      [
+        1,
+        "Sternothyroid muscle and its nerve (a branch of the ansa cervicalis)"
+      ],
       [
         2,
         "Right internal jugular vein"
@@ -3071,6 +3075,12 @@
     ]
   ],
   "cardio-06": [
+    [
+      1,
+      12.5,
+      28.5,
+      "left"
+    ],
     [
       2,
       9.0,
@@ -6223,9 +6233,9 @@
         if (!rendered.length) return;
 
         const markerSize = Math.max(...rendered.map(m => m.getBoundingClientRect().width));
-        const laneGap = markerSize + 2;
-        const laneStep = markerSize + 3;
-        const edgeInset = (markerSize / 2) + 2;
+        const laneGap = markerSize - 1;
+        const laneStep = markerSize + 1;
+        const edgeInset = (markerSize / 2) + 1;
 
         ["left", "right"].forEach(side => {
           const markers = rendered
@@ -6237,16 +6247,24 @@
             }))
             .sort((a, b) => a.desiredY - b.desiredY);
 
-          const laneLastY = [];
+          const laneLastY = [-999, -999];
           markers.forEach(({ marker, desiredX, desiredY }) => {
-            let lane = laneLastY.findIndex(lastY => desiredY - lastY >= laneGap);
-            if (lane === -1) lane = laneLastY.length;
-            laneLastY[lane] = desiredY;
+            let lane = 0;
+            if (desiredY - laneLastY[0] >= laneGap) {
+              lane = 0;
+            } else if (desiredY - laneLastY[1] >= laneGap) {
+              lane = 1;
+            } else {
+              // Pick whichever of the 2 margin lanes has more room & nudge slightly so circles never overlap
+              lane = laneLastY[0] <= laneLastY[1] ? 0 : 1;
+            }
+            const placedY = Math.max(desiredY, laneLastY[lane] + laneGap);
+            laneLastY[lane] = placedY;
 
             const dir = side === "left" ? 1 : -1;
             const placedX = Math.min(layerWidth - edgeInset, Math.max(edgeInset, desiredX + dir * lane * laneStep));
             marker.style.left = `${placedX}px`;
-            marker.style.top = `${desiredY}px`;
+            marker.style.top = `${placedY}px`;
           });
         });
       }
